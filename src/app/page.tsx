@@ -107,7 +107,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="text-center py-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">⚽ GOALDLE ⚽</h1>
@@ -132,7 +132,7 @@ export default function Home() {
                 />
               ) : (
                 <div className="relative mx-auto max-w-sm">
-                  <div className="relative w-full h-80 rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
+                  <div className="relative w-full h-[32rem] rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
                     <div className="flex items-center justify-center h-full text-gray-500 text-lg font-bold">
                       ⚽ Loading player...
                     </div>
@@ -208,12 +208,12 @@ export default function Home() {
 
         {/* Instructions */}
         <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mt-8">
-          <h3 className="font-bold text-gray-800 mb-4 text-center">How to Play</h3>
+          <h3 className="font-bold text-gray-800 mb-4 text-center">HOW TO PLAY</h3>
           <div className="text-gray-600 text-sm space-y-3">
             <p>1. Study the blurred video of today's mystery player.</p>
             <p>2. Guess any player name to see stat comparison and how close you are to the answer.</p>
             <p>3. Use the color coding and hints from the video to guide your next guess.</p>
-            <div className="flex justify-center space-x-6 mt-3">
+            <div className="flex justify-center space-x-6 mt-5">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-md"></div>
                 <span className="text-xs font-medium">CORRECT</span>

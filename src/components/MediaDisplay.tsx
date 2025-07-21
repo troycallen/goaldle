@@ -24,8 +24,8 @@ export default function MediaDisplay({ player, revealed = false }: MediaDisplayP
   const { media } = player;
 
   return (
-    <div className="relative mx-auto max-w-sm">
-      <div className="relative w-full h-80 rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
+    <div className="relative mx-auto max-w-3xl">
+      <div className="relative w-full h-[32rem] rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
         <img
           src={media.url}
           alt={revealed ? `${player.name}` : "Mystery player"}
