@@ -6,6 +6,8 @@ import GuessInput from '@/components/GuessInput';
 import PlayerCard from '@/components/PlayerCard';
 import DailyChallenge from '@/components/DailyChallenge';
 import ScoreDisplay from '@/components/ScoreDisplay';
+import GuessRow from '@/components/GuessRow';
+import GuessTableHeader from '@/components/GuessTableHeader';
 import { GameState } from '@/utils/gameLogic';
 import { scoringSystem, localStorageManager, GameScore } from '@/utils/scoring';
 
@@ -215,47 +217,17 @@ export default function Home() {
                   {/* Guess Input */}
                   <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
 
-                  {/* Previous Attempts */}
+                  {/* Wordle-style Guess Table */}
                   {gameState?.attempts && gameState.attempts.length > 0 && (
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-gray-700">Previous Guesses:</h3>
-                      <div className="space-y-2">
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
+                      <GuessTableHeader />
+                      <div className="space-y-0">
                         {gameState.attempts.map((attempt, index) => (
-                          <div key={index} className="bg-red-100 text-red-700 px-3 py-2 rounded-lg border">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{attempt.playerName}</span>
-                              <span className="text-sm">❌</span>
-                            </div>
-                            {attempt.player && (
-                              <div className="text-xs mt-1 space-y-1">
-                                <div className="flex space-x-4">
-                                  <span className={`px-2 py-1 rounded text-xs ${
-                                    attempt.similarity.team === 'correct' ? 'bg-green-200 text-green-800' :
-                                    attempt.similarity.team === 'league_match' ? 'bg-yellow-200 text-yellow-800' :
-                                    'bg-red-200 text-red-800'
-                                  }`}>
-                                    Team: {attempt.similarity.team}
-                                  </span>
-                                  <span className={`px-2 py-1 rounded text-xs ${
-                                    attempt.similarity.position === 'correct' ? 'bg-green-200 text-green-800' :
-                                    attempt.similarity.position === 'similar' ? 'bg-yellow-200 text-yellow-800' :
-                                    'bg-red-200 text-red-800'
-                                  }`}>
-                                    Position: {attempt.similarity.position}
-                                  </span>
-                                  <span className={`px-2 py-1 rounded text-xs ${
-                                    attempt.similarity.nationality === 'correct' ? 'bg-green-200 text-green-800' :
-                                    'bg-red-200 text-red-800'
-                                  }`}>
-                                    Nation: {attempt.similarity.nationality}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          <GuessRow key={index} attempt={attempt} index={index} />
                         ))}
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 text-center">
                         Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
                       </p>
                     </div>
@@ -267,14 +239,28 @@ export default function Home() {
         </div>
 
         {/* Instructions */}
-        <div className="bg-blue-50 rounded-lg p-4 text-center">
-          <h3 className="font-semibold text-blue-800 mb-2">How to Play</h3>
-          <p className="text-blue-600 text-sm">
-            1. Study the blurred image of today&apos;s mystery player<br/>
-            2. Guess the player&apos;s name to see similarity feedback<br/>
-            3. Get progressive hints with each wrong guess<br/>
-            4. You have 6 attempts to identify the player!
-          </p>
+        <div className="bg-blue-50 rounded-lg p-4">
+          <h3 className="font-semibold text-blue-800 mb-3 text-center">How to Play</h3>
+          <div className="text-blue-600 text-sm space-y-2">
+            <p>1. Study the blurred image of today&apos;s mystery player</p>
+            <p>2. Guess any player name to see stat comparisons</p>
+            <p>3. Use the color coding to guide your next guess:</p>
+            <div className="flex justify-center space-x-4 mt-2">
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4 bg-green-500 rounded"></div>
+                <span className="text-xs">Correct</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                <span className="text-xs">Close</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                <span className="text-xs">Wrong</span>
+              </div>
+            </div>
+            <p className="text-center mt-2">4. You have 6 attempts to identify the player!</p>
+          </div>
         </div>
       </div>
     </div>
