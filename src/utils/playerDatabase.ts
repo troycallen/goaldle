@@ -29,8 +29,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: '/players/messi.svg',
-      description: 'Lionel Messi in Argentina colors'
+      url: '/test-image.svg',
+      description: 'Test image for Lionel Messi'
     },
     hints: [
       'This player has won 8 Ballon d\'Or awards',

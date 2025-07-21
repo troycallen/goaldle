@@ -10,6 +10,8 @@ interface MediaDisplayProps {
 
 export default function MediaDisplay({ player, revealed = false }: MediaDisplayProps) {
   const { media } = player;
+  
+  console.log('MediaDisplay - Player:', player.name, 'Media URL:', media.url, 'Revealed:', revealed);
 
   return (
     <div className="relative">
