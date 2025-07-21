@@ -1,14 +1,14 @@
 # ⚽ Goaldle
 
-A soccer/football player guessing game inspired by Wordle, featuring computer vision analysis of player images.
+A soccer/football player guessing game inspired by Wordle, where players guess the mystery player from a daily curated image.
 
 ## Features
 
 ### ✨ Core Gameplay
-- **Image Upload**: Drag & drop or click to upload soccer player photos
-- **Computer Vision**: TensorFlow.js-powered analysis to extract visual clues
-- **Smart Guessing**: Autocomplete player suggestions with similarity feedback
-- **6 Attempts**: Wordle-style limited attempts with detailed feedback
+- **Daily Mystery Player**: Each day features a different pre-selected player
+- **Blurred Images**: Players start with a blurred/obscured image to analyze
+- **Progressive Hints**: Each wrong guess reveals more clues about the player
+- **6 Attempts**: Wordle-style limited attempts with detailed similarity feedback
 
 ### 🏆 Game Modes
 - **Free Play**: Practice with random players
@@ -17,7 +17,7 @@ A soccer/football player guessing game inspired by Wordle, featuring computer vi
 
 ### 📊 Player Feedback System
 - **Color-coded Similarity**: Visual feedback for team, position, nationality, age, and height matches
-- **Progressive Hints**: Image analysis provides clues about jersey color, height, and physical features
+- **Progressive Hints**: Each attempt unlocks career achievements and player facts
 - **Detailed Statistics**: Track wins, streaks, and performance over time
 
 ### 🎯 Daily Challenge & Social Features
@@ -49,24 +49,24 @@ A soccer/football player guessing game inspired by Wordle, featuring computer vi
 
 - **Next.js 15** with App Router and TypeScript
 - **Tailwind CSS** for styling
-- **TensorFlow.js** for computer vision
+- **Curated Player Database** with high-quality images and hints
 - **Next.js API Routes** for backend functionality
 
 ## How to Play
 
-1. **Upload an Image**: Drag and drop or click to upload a soccer player photo
-2. **Get Visual Clues**: The AI analyzes the image and provides hints about jersey color, height, etc.
-3. **Make Your Guess**: Type a player name with autocomplete suggestions
-4. **Get Feedback**: See how your guess compares across team, position, nationality, age, and height
+1. **Study the Mystery**: Look at the blurred image of today's mystery player
+2. **Make Your Guess**: Type a player name with autocomplete suggestions  
+3. **Get Feedback**: See how your guess compares across team, position, nationality, age, and height
+4. **Unlock Hints**: Each wrong guess reveals more clues about the player's career
 5. **Win or Learn**: Solve in 6 attempts or less to earn points!
 
 ## Game Features
 
-- 10 popular soccer players in the database
-- Smart similarity matching system
-- Daily challenges with consistent players
-- Score calculation based on performance
-- Statistics tracking and sharing
+- **10 Curated Players**: Each with professional photos and career facts
+- **Smart Similarity System**: Detailed feedback on team, position, nationality, age, and height
+- **Daily Challenges**: Same mystery player for all users each day
+- **Progressive Hints**: Career achievements and facts unlock with each guess
+- **Score & Stats**: Performance tracking with sharing capabilities
 
 ## Future Enhancements
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ImageUpload from '@/components/ImageUpload';
+import MediaDisplay from '@/components/MediaDisplay';
 import GuessInput from '@/components/GuessInput';
 import PlayerCard from '@/components/PlayerCard';
 import DailyChallenge from '@/components/DailyChallenge';
@@ -10,10 +10,8 @@ import { GameState } from '@/utils/gameLogic';
 import { scoringSystem, localStorageManager, GameScore } from '@/utils/scoring';
 
 export default function Home() {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [guess, setGuess] = useState('');
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [hints, setHints] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [gameStartTime, setGameStartTime] = useState<Date | null>(null);
   const [isDailyChallenge, setIsDailyChallenge] = useState(false);
@@ -35,8 +33,6 @@ export default function Home() {
       if (response.ok) {
         const result = await response.json();
         setGameState(result.gameState);
-        setHints([]);
-        setUploadedImage(null);
         setGameStartTime(new Date());
         setIsDailyChallenge(isDaily);
         setShowDailyChallenge(!isDaily);
@@ -48,41 +44,6 @@ export default function Home() {
     }
   };
 
-  const handleImageUpload = async (file: File) => {
-    const imageUrl = URL.createObjectURL(file);
-    setUploadedImage(imageUrl);
-    
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      const response = await fetch('/api/analyze-image', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        // Send analysis to game logic
-        await fetch('/api/game', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            action: 'set_image_analysis', 
-            data: { analysis: result.analysis } 
-          })
-        });
-        
-        setHints(result.hints || []);
-      }
-    } catch (error) {
-      console.error('Error analyzing image:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGuess = async (playerGuess: string) => {
     if (!gameState || gameState.gameWon || gameState.gameLost) return;
@@ -103,10 +64,6 @@ export default function Home() {
         setGameState(result.gameState);
         setGuess('');
         
-        if (result.additionalHints) {
-          setHints(prev => [...prev, ...result.additionalHints]);
-        }
-
         // Handle game completion
         if (result.gameState.gameWon || result.gameState.gameLost) {
           const timeElapsed = gameStartTime 
@@ -117,7 +74,7 @@ export default function Home() {
             const score = scoringSystem.calculateScore(
               result.gameState.attempts.length,
               timeElapsed,
-              hints.length,
+              0, // No hints used in new format
               true
             );
 
@@ -127,7 +84,7 @@ export default function Home() {
               attempts: result.gameState.attempts.length,
               won: true,
               timeElapsed,
-              hintsUsed: hints.length,
+              hintsUsed: 0, // No hints used in new format
               score
             };
 
@@ -161,32 +118,32 @@ export default function Home() {
           {loading && (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Processing...</p>
+              <p className="text-gray-600 mt-2">Loading game...</p>
             </div>
           )}
           
-          {!uploadedImage ? (
-            <ImageUpload onImageUpload={handleImageUpload} />
-          ) : (
+          {gameState?.targetPlayer && (
             <div className="space-y-6">
-              {/* Uploaded Image */}
-              <div className="text-center">
-                <img 
-                  src={uploadedImage} 
-                  alt="Player to guess" 
-                  className="max-w-md mx-auto rounded-lg shadow-md"
-                />
-              </div>
+              {/* Player Media */}
+              <MediaDisplay 
+                player={gameState.targetPlayer} 
+                revealed={gameState.gameWon || gameState.gameLost}
+              />
 
-              {/* Hints from Image Analysis */}
-              {hints.length > 0 && (
+              {/* Progressive Hints */}
+              {gameState.attempts.length > 0 && (
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-800 mb-2">🔍 Visual Clues:</h3>
+                  <h3 className="font-semibold text-blue-800 mb-2">💡 Hints:</h3>
                   <ul className="text-blue-700 text-sm space-y-1">
-                    {hints.map((hint, index) => (
+                    {gameState.targetPlayer.hints.slice(0, gameState.attempts.length).map((hint, index) => (
                       <li key={index}>• {hint}</li>
                     ))}
                   </ul>
+                  {gameState.attempts.length < gameState.targetPlayer.hints.length && (
+                    <p className="text-xs text-blue-600 mt-2 italic">
+                      More hints unlock with each guess...
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -202,7 +159,7 @@ export default function Home() {
                       score={scoringSystem.calculateScore(
                         gameState.attempts.length,
                         Math.floor((Date.now() - gameStartTime.getTime()) / 1000),
-                        hints.length,
+                        0, // No hints used in new format
                         true
                       )}
                       attempts={gameState.attempts.length}
@@ -313,9 +270,10 @@ export default function Home() {
         <div className="bg-blue-50 rounded-lg p-4 text-center">
           <h3 className="font-semibold text-blue-800 mb-2">How to Play</h3>
           <p className="text-blue-600 text-sm">
-            1. Upload or take a photo of a soccer player<br/>
-            2. Guess the player&apos;s name<br/>
-            3. You have 6 attempts to get it right!
+            1. Study the blurred image of today&apos;s mystery player<br/>
+            2. Guess the player&apos;s name to see similarity feedback<br/>
+            3. Get progressive hints with each wrong guess<br/>
+            4. You have 6 attempts to identify the player!
           </p>
         </div>
       </div>

@@ -60,13 +60,6 @@ export async function POST(request: NextRequest) {
           suggestions
         });
 
-      case 'set_image_analysis':
-        const { analysis } = data;
-        gameLogic.setImageAnalysis(analysis);
-        return NextResponse.json({
-          success: true,
-          message: 'Image analysis set successfully'
-        });
 
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

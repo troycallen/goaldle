@@ -1,5 +1,4 @@
 import { Player, playerDB } from './playerDatabase';
-import { ImageAnalysisResult } from './imageAnalysis';
 
 export interface GameState {
   targetPlayer: Player | null;
@@ -7,8 +6,6 @@ export interface GameState {
   gameWon: boolean;
   gameLost: boolean;
   maxAttempts: number;
-  hints: string[];
-  imageAnalysis: ImageAnalysisResult | null;
 }
 
 export interface GuessAttempt {
@@ -40,9 +37,7 @@ export class GameLogic {
       attempts: [],
       gameWon: false,
       gameLost: false,
-      maxAttempts: 6,
-      hints: [],
-      imageAnalysis: null
+      maxAttempts: 6
     };
   }
 
@@ -58,28 +53,6 @@ export class GameLogic {
     return this.gameState;
   }
 
-  setImageAnalysis(analysis: ImageAnalysisResult): void {
-    this.gameState.imageAnalysis = analysis;
-    this.generateHintsFromAnalysis(analysis);
-  }
-
-  private generateHintsFromAnalysis(analysis: ImageAnalysisResult): void {
-    const hints: string[] = [];
-    
-    if (analysis.playerFeatures.jersey_color) {
-      hints.push(`The player is wearing a ${analysis.playerFeatures.jersey_color} jersey`);
-    }
-    
-    if (analysis.playerFeatures.estimated_height) {
-      hints.push(`The player appears to be ${analysis.playerFeatures.estimated_height} in height`);
-    }
-    
-    if (analysis.playerFeatures.hair_color) {
-      hints.push(`The player has ${analysis.playerFeatures.hair_color} hair`);
-    }
-
-    this.gameState.hints = hints;
-  }
 
   makeGuess(playerName: string): { 
     gameState: GameState; 
@@ -118,13 +91,9 @@ export class GameLogic {
       this.gameState.gameLost = true;
     }
 
-    // Generate additional hints based on guess
-    const additionalHints = this.generateHintsFromGuess(guessAttempt);
-
     return {
       gameState: this.gameState,
-      guessResult: guessAttempt,
-      additionalHints
+      guessResult: guessAttempt
     };
   }
 
@@ -194,34 +163,6 @@ export class GameLogic {
     return 'wrong';
   }
 
-  private generateHintsFromGuess(attempt: GuessAttempt): string[] {
-    const hints: string[] = [];
-    
-    if (!attempt.player || !this.gameState.targetPlayer) return hints;
-
-    const { similarity } = attempt;
-    const target = this.gameState.targetPlayer;
-
-    if (similarity.nationality === 'correct') {
-      hints.push(`✅ Correct nationality: ${target.nationality}`);
-    }
-
-    if (similarity.position === 'correct') {
-      hints.push(`✅ Correct position: ${target.position}`);
-    } else if (similarity.position === 'similar') {
-      hints.push(`🟡 Similar position to ${target.position}`);
-    }
-
-    if (similarity.age === 'close') {
-      hints.push(`🟡 Close age (within 2 years of ${target.age})`);
-    }
-
-    if (similarity.team === 'league_match') {
-      hints.push(`🟡 Same league as the target player`);
-    }
-
-    return hints;
-  }
 
   getGameState(): GameState {
     return { ...this.gameState };

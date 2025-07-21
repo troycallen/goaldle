@@ -6,17 +6,17 @@ export interface Player {
   nationality: string;
   age: number;
   height: number; // in cm
-  imageUrl?: string;
   jerseyNumber?: number;
-  features: {
-    hair_color: string;
-    skin_tone: string;
-    height_category: 'short' | 'medium' | 'tall';
-    jersey_colors: string[];
+  media: {
+    type: 'image' | 'video';
+    url: string;
+    thumbnail?: string;
+    description: string;
   };
+  hints: string[];
 }
 
-// Mock player database - in production, this would come from a real database
+// Curated player database with daily challenges
 export const PLAYERS: Player[] = [
   {
     id: '1',
@@ -27,12 +27,17 @@ export const PLAYERS: Player[] = [
     age: 36,
     height: 170,
     jerseyNumber: 10,
-    features: {
-      hair_color: 'brown',
-      skin_tone: 'light',
-      height_category: 'short',
-      jersey_colors: ['pink', 'white', 'blue']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400',
+      description: 'Player in action during a match'
+    },
+    hints: [
+      'This player has won 8 Ballon d\'Or awards',
+      'Known as "La Pulga" (The Flea)',
+      'Currently plays in MLS',
+      'Led Argentina to World Cup victory in 2022'
+    ]
   },
   {
     id: '2',
@@ -43,12 +48,17 @@ export const PLAYERS: Player[] = [
     age: 39,
     height: 187,
     jerseyNumber: 7,
-    features: {
-      hair_color: 'black',
-      skin_tone: 'medium',
-      height_category: 'tall',
-      jersey_colors: ['yellow', 'blue', 'white']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
+      description: 'Player celebrating a goal'
+    },
+    hints: [
+      'All-time top scorer in Champions League',
+      'Known as "CR7"',
+      'Has played in England, Spain, Italy, and Saudi Arabia',
+      'Won Euro 2016 with his national team'
+    ]
   },
   {
     id: '3',
@@ -59,12 +69,17 @@ export const PLAYERS: Player[] = [
     age: 25,
     height: 178,
     jerseyNumber: 9,
-    features: {
-      hair_color: 'black',
-      skin_tone: 'dark',
-      height_category: 'medium',
-      jersey_colors: ['white', 'blue', 'red']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
+      description: 'Player dribbling with the ball'
+    },
+    hints: [
+      'World Cup winner at age 19',
+      'One of the fastest players in world football',
+      'Recently transferred to Real Madrid',
+      'Became PSG\'s all-time leading scorer'
+    ]
   },
   {
     id: '4',
@@ -75,12 +90,17 @@ export const PLAYERS: Player[] = [
     age: 24,
     height: 194,
     jerseyNumber: 9,
-    features: {
-      hair_color: 'blonde',
-      skin_tone: 'light',
-      height_category: 'tall',
-      jersey_colors: ['sky_blue', 'white', 'navy']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1544264555-32237ff83ba2?w=400',
+      description: 'Player preparing to take a shot'
+    },
+    hints: [
+      'Scored 52 goals in his debut Premier League season',
+      'Son of former player Alfie Haaland',
+      'Known for his incredible finishing ability',
+      'Helped Manchester City win the treble'
+    ]
   },
   {
     id: '5',
@@ -91,12 +111,17 @@ export const PLAYERS: Player[] = [
     age: 32,
     height: 175,
     jerseyNumber: 10,
-    features: {
-      hair_color: 'blonde',
-      skin_tone: 'medium',
-      height_category: 'medium',
-      jersey_colors: ['blue', 'white', 'yellow']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1577223078503-bc6de6f5dd42?w=400',
+      description: 'Player with skill moves'
+    },
+    hints: [
+      'Most expensive transfer in football history',
+      'Known for his flair and skill moves',
+      'Olympic gold medalist with Brazil',
+      'Former Barcelona and PSG star'
+    ]
   },
   {
     id: '6',
@@ -107,12 +132,17 @@ export const PLAYERS: Player[] = [
     age: 33,
     height: 181,
     jerseyNumber: 17,
-    features: {
-      hair_color: 'blonde',
-      skin_tone: 'light',
-      height_category: 'medium',
-      jersey_colors: ['sky_blue', 'white', 'red']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
+      description: 'Player making a pass'
+    },
+    hints: [
+      'One of the best playmakers in the world',
+      'Known for his incredible passing range',
+      'Multiple Premier League champion',
+      'PFA Player of the Year winner'
+    ]
   },
   {
     id: '7',
@@ -123,12 +153,17 @@ export const PLAYERS: Player[] = [
     age: 32,
     height: 175,
     jerseyNumber: 11,
-    features: {
-      hair_color: 'black',
-      skin_tone: 'medium',
-      height_category: 'medium',
-      jersey_colors: ['red', 'white', 'yellow']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400',
+      description: 'Player running with the ball'
+    },
+    hints: [
+      'Known as the "Egyptian King"',
+      'Premier League Golden Boot winner',
+      'Champions League winner with Liverpool',
+      'First Arab player to score 150+ Premier League goals'
+    ]
   },
   {
     id: '8',
@@ -139,12 +174,17 @@ export const PLAYERS: Player[] = [
     age: 33,
     height: 193,
     jerseyNumber: 4,
-    features: {
-      hair_color: 'black',
-      skin_tone: 'dark',
-      height_category: 'tall',
-      jersey_colors: ['red', 'white', 'orange']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1556056654-c5bce0b59a21?w=400',
+      description: 'Player defending'
+    },
+    hints: [
+      'Most expensive defender in football history (at time of transfer)',
+      'Champions League and Premier League winner',
+      'Known for his aerial ability and leadership',
+      'Netherlands national team captain'
+    ]
   },
   {
     id: '9',
@@ -155,12 +195,17 @@ export const PLAYERS: Player[] = [
     age: 39,
     height: 172,
     jerseyNumber: 10,
-    features: {
-      hair_color: 'brown',
-      skin_tone: 'light',
-      height_category: 'short',
-      jersey_colors: ['white', 'navy', 'red']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400',
+      description: 'Player controlling the ball'
+    },
+    hints: [
+      'Ballon d\'Or winner in 2018',
+      'Led Croatia to World Cup final',
+      'Multiple Champions League winner',
+      'Known for his incredible longevity'
+    ]
   },
   {
     id: '10',
@@ -171,12 +216,17 @@ export const PLAYERS: Player[] = [
     age: 31,
     height: 188,
     jerseyNumber: 9,
-    features: {
-      hair_color: 'brown',
-      skin_tone: 'light',
-      height_category: 'tall',
-      jersey_colors: ['red', 'white', 'navy']
-    }
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
+      description: 'Player shooting'
+    },
+    hints: [
+      'England\'s all-time leading goalscorer',
+      'Multiple Premier League Golden Boot winner',
+      'Recently transferred to Bayern Munich',
+      'Known for his clinical finishing'
+    ]
   }
 ];
 
@@ -225,30 +275,9 @@ export class PlayerDatabase {
     return Math.abs(hash);
   }
 
-  getPlayersSimilarTo(targetPlayer: Player, features: { jersey_color?: string; estimated_height?: string; hair_color?: string }): Player[] {
-    return this.players.filter(player => {
-      if (player.id === targetPlayer.id) return false;
-      
-      let similarityScore = 0;
-      
-      // Check jersey color match
-      if (features.jersey_color && 
-          player.features.jersey_colors.includes(features.jersey_color)) {
-        similarityScore++;
-      }
-      
-      // Check height category match
-      if (features.estimated_height === player.features.height_category) {
-        similarityScore++;
-      }
-      
-      // Check hair color match
-      if (features.hair_color === player.features.hair_color) {
-        similarityScore++;
-      }
-      
-      return similarityScore > 0;
-    });
+  getPlayerHints(player: Player, attemptNumber: number): string[] {
+    // Reveal hints progressively based on attempt number
+    return player.hints.slice(0, Math.min(attemptNumber, player.hints.length));
   }
 }
 
