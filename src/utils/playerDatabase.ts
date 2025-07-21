@@ -29,8 +29,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=1',
-      description: 'Soccer player in action'
+      url: '/players/messi.svg',
+      description: 'Lionel Messi test image'
     },
     hints: [
       'This player has won 8 Ballon d\'Or awards',
@@ -51,7 +51,7 @@ export const PLAYERS: Player[] = [
     media: {
       type: 'image',
       url: '/players/ronaldo.svg',
-      description: 'Cristiano Ronaldo celebrating'
+      description: 'Cristiano Ronaldo test image'
     },
     hints: [
       'All-time top scorer in Champions League',
@@ -72,7 +72,7 @@ export const PLAYERS: Player[] = [
     media: {
       type: 'image',
       url: '/players/mbappe.svg',
-      description: 'Kylian Mbappé in action'
+      description: 'Kylian Mbappé test image'
     },
     hints: [
       'World Cup winner at age 19',
@@ -93,7 +93,7 @@ export const PLAYERS: Player[] = [
     media: {
       type: 'image',
       url: '/players/haaland.svg',
-      description: 'Erling Haaland in Manchester City colors'
+      description: 'Erling Haaland test image'
     },
     hints: [
       'Scored 52 goals in his debut Premier League season',
@@ -113,8 +113,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=5',
-      description: 'Neymar showing his skills'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'Most expensive transfer in football history',
@@ -134,8 +134,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 17,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=6',
-      description: 'Kevin De Bruyne creating a play'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'One of the best playmakers in the world',
@@ -155,8 +155,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 11,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=7',
-      description: 'Mohamed Salah on the attack'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'Known as the "Egyptian King"',
@@ -176,8 +176,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 4,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=8',
-      description: 'Virgil van Dijk defending'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'Most expensive defender in football history (at time of transfer)',
@@ -197,8 +197,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=9',
-      description: 'Luka Modrić controlling the midfield'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'Ballon d\'Or winner in 2018',
@@ -218,8 +218,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: 'https://picsum.photos/400/400?random=10',
-      description: 'Harry Kane taking a shot'
+      url: '/players/default.svg',
+      description: 'Default test image'
     },
     hints: [
       'England\'s all-time leading goalscorer',
