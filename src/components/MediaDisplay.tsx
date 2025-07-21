@@ -26,6 +26,12 @@ export default function MediaDisplay({ player, revealed = false }: MediaDisplayP
                 className={`w-full h-full object-cover transition-all duration-500 ${
                   !revealed ? 'blur-md grayscale' : ''
                 }`}
+                onError={(e) => {
+                  console.error('Image failed to load:', media.url);
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzMzNzNkYyIvPjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiPk1FU1NJPC90ZXh0Pjwvc3ZnPg==';
+                }}
+                onLoad={() => console.log('Image loaded successfully:', media.url)}
               />
               {!revealed && (
                 <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">

@@ -20,12 +20,13 @@ export default function DailyChallenge({ onStartDailyChallenge }: DailyChallenge
   } | null>(null);
 
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const score = localStorageManager.getTodayScore(today);
-    const userStats = localStorageManager.getStats();
+    // Temporarily disable localStorage to test fresh game
+    // const today = new Date().toISOString().split('T')[0];
+    // const score = localStorageManager.getTodayScore(today);
+    // const userStats = localStorageManager.getStats();
     
-    setTodayScore(score);
-    setStats(userStats);
+    setTodayScore(null); // Force fresh game for testing
+    setStats(null);
   }, []);
 
   const getTimeUntilMidnight = () => {
