@@ -29,7 +29,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=400&fit=crop',
+      url: 'https://picsum.photos/400/400?random=1',
       description: 'Soccer player in action'
     },
     hints: [
@@ -113,7 +113,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=5',
       description: 'Neymar showing his skills'
     },
     hints: [
@@ -134,7 +134,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 17,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=6',
       description: 'Kevin De Bruyne creating a play'
     },
     hints: [
@@ -155,7 +155,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 11,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=7',
       description: 'Mohamed Salah on the attack'
     },
     hints: [
@@ -176,7 +176,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 4,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=8',
       description: 'Virgil van Dijk defending'
     },
     hints: [
@@ -197,7 +197,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=9',
       description: 'Luka Modrić controlling the midfield'
     },
     hints: [
@@ -218,7 +218,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: '/players/default.svg',
+      url: 'https://picsum.photos/400/400?random=10',
       description: 'Harry Kane taking a shot'
     },
     hints: [

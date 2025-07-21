@@ -37,6 +37,8 @@ export default function Home() {
       if (response.ok) {
         const result = await response.json();
         console.log('Starting new game, result:', result);
+        console.log('Game state attempts:', result.gameState?.attempts?.length);
+        console.log('Game won/lost:', result.gameState?.gameWon, result.gameState?.gameLost);
         setGameState(result.gameState);
         setGameStartTime(new Date());
         setIsDailyChallenge(isDaily);
@@ -124,102 +126,57 @@ export default function Home() {
           
           {gameState?.targetPlayer && (
             <div className="space-y-6">
-              {console.log('Rendering game, attempts length:', gameState.attempts?.length)}
-              
-              {/* Player Media */}
+              {/* Always show image */}
               <MediaDisplay 
                 player={gameState.targetPlayer} 
                 revealed={gameState.gameWon || gameState.gameLost}
               />
 
-              {/* Guess Input - Below the image */}
-              {!gameState.gameWon && !gameState.gameLost && (
-                <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
-              )}
-
-              {/* Wordle-style Guess Table - Only show if there are attempts */}
-              {gameState.attempts && gameState.attempts.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
-                  <GuessTableHeader />
-                  <div className="space-y-0">
-                    {gameState.attempts.map((attempt, index) => (
-                      <GuessRow key={index} attempt={attempt} index={index} />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500 text-center">
-                    Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
-                  </p>
+              {/* Show different content based on game state */}
+              {gameState.gameWon ? (
+                /* GAME WON */
+                <div className="text-center space-y-4">
+                  <h2 className="text-2xl font-bold text-green-600">🎉 You Won!</h2>
+                  <PlayerCard player={gameState.targetPlayer} isCorrect={true} />
+                  <button 
+                    onClick={() => startNewGame(true)}
+                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Play Again
+                  </button>
                 </div>
-              )}
-
-              {/* Progressive Hints - Only show if there are attempts */}
-              {gameState.attempts.length > 0 && (
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-800 mb-2">💡 Hints:</h3>
-                  <ul className="text-blue-700 text-sm space-y-1">
-                    {gameState.targetPlayer.hints.slice(0, gameState.attempts.length).map((hint, index) => (
-                      <li key={index}>• {hint}</li>
-                    ))}
-                  </ul>
-                  {gameState.attempts.length < gameState.targetPlayer.hints.length && (
-                    <p className="text-xs text-blue-600 mt-2 italic">
-                      More hints unlock with each guess...
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Game Won State */}
-              {gameState?.gameWon ? (
-                <div className="space-y-4">
-                  {gameState.targetPlayer && (
-                    <PlayerCard player={gameState.targetPlayer} isCorrect={true} />
-                  )}
-                  
-                  {gameStartTime && (
-                    <ScoreDisplay
-                      score={scoringSystem.calculateScore(
-                        gameState.attempts.length,
-                        Math.floor((Date.now() - gameStartTime.getTime()) / 1000),
-                        0, // No hints used in new format
-                        true
-                      )}
-                      attempts={gameState.attempts.length}
-                      timeElapsed={Math.floor((Date.now() - gameStartTime.getTime()) / 1000)}
-                      won={true}
-                    />
-                  )}
-                  
-                  <div className="text-center">
-                    <button 
-                      onClick={() => startNewGame(true)}
-                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      Play Again
-                    </button>
-                  </div>
-                </div>
-              ) : gameState?.gameLost ? (
+              ) : gameState.gameLost ? (
+                /* GAME LOST */
                 <div className="text-center space-y-4">
                   <h2 className="text-2xl font-bold text-red-600">😔 Game Over!</h2>
-                  <p className="text-gray-600">You&apos;ve used all your attempts.</p>
-                  {gameState.targetPlayer && (
-                    <div>
-                      <p className="text-gray-700 mb-2">The correct answer was:</p>
-                      <PlayerCard player={gameState.targetPlayer} />
+                  <p className="text-gray-600">The correct answer was:</p>
+                  <PlayerCard player={gameState.targetPlayer} />
+                  <button 
+                    onClick={() => startNewGame(true)}
+                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                /* PLAYING STATE */
+                <>
+                  <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
+                  
+                  {gameState.attempts && gameState.attempts.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
+                      <GuessTableHeader />
+                      {gameState.attempts.map((attempt, index) => (
+                        <GuessRow key={index} attempt={attempt} index={index} />
+                      ))}
+                      <p className="text-sm text-gray-500 text-center">
+                        Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
+                      </p>
                     </div>
                   )}
-                  <div className="text-center">
-                    <button 
-                      onClick={() => startNewGame(true)}
-                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      Try Again
-                    </button>
-                  </div>
-                </div>
-              ) : null}
+                </>
+              )}
             </div>
           )}
         </div>

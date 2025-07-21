@@ -10,15 +10,11 @@ export async function POST(request: NextRequest) {
       case 'start_new_game':
         const isDailyChallenge = data?.isDailyChallenge || false;
         const gameState = gameLogic.startNewGame(isDailyChallenge);
+        // For the start of the game, we need to send the target player data for the image
+        // but we shouldn't reveal the answer. The name will be hidden in the frontend.
         return NextResponse.json({
           success: true,
-          gameState: {
-            ...gameState,
-            targetPlayer: gameState.targetPlayer ? {
-              ...gameState.targetPlayer,
-              name: '[HIDDEN]' // Hide the name but keep other data for display
-            } : null
-          }
+          gameState: gameState
         });
 
       case 'make_guess':

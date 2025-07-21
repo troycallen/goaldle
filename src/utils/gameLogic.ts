@@ -42,13 +42,27 @@ export class GameLogic {
   }
 
   startNewGame(isDailyChallenge: boolean = false): GameState {
-    this.gameState = this.initializeGame();
+    // Force fresh initialization
+    this.gameState = {
+      targetPlayer: null,
+      attempts: [],
+      gameWon: false,
+      gameLost: false,
+      maxAttempts: 6
+    };
     
     if (isDailyChallenge) {
       this.gameState.targetPlayer = playerDB.getDailyPlayer();
     } else {
       this.gameState.targetPlayer = playerDB.getRandomPlayer();
     }
+    
+    console.log('Fresh game state created:', {
+      gameWon: this.gameState.gameWon,
+      gameLost: this.gameState.gameLost,
+      attemptsLength: this.gameState.attempts.length,
+      targetPlayerName: this.gameState.targetPlayer?.name
+    });
     
     return this.gameState;
   }
@@ -68,6 +82,13 @@ export class GameLogic {
     }
 
     const guessedPlayer = playerDB.getPlayerByName(playerName);
+    console.log('Making guess:', {
+      playerName,
+      guessedPlayer: guessedPlayer?.name,
+      targetPlayer: this.gameState.targetPlayer?.name,
+      guessedId: guessedPlayer?.id,
+      targetId: this.gameState.targetPlayer?.id
+    });
     const isCorrect = guessedPlayer?.id === this.gameState.targetPlayer.id;
     
     const similarity = this.calculateSimilarity(
