@@ -68,19 +68,6 @@ export default function MediaDisplay({ player, revealed = false }: MediaDisplayP
           )}
         </div>
 
-        {/* Media Description */}
-        <p className="text-gray-600 text-sm italic">
-          {media.description}
-        </p>
-
-        {/* Game State Indicator */}
-        <div className="text-xs text-gray-500">
-          {revealed ? (
-            <span className="text-green-600 font-semibold">✅ Player Revealed</span>
-          ) : (
-            <span>🔍 Can you identify this player?</span>
-          )}
-        </div>
       </div>
     </div>
   );

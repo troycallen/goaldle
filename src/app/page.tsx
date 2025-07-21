@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import MediaDisplay from '@/components/MediaDisplay';
 import GuessInput from '@/components/GuessInput';
 import PlayerCard from '@/components/PlayerCard';
-import DailyChallenge from '@/components/DailyChallenge';
+// import DailyChallenge from '@/components/DailyChallenge'; // Removed - starting directly with game
 import ScoreDisplay from '@/components/ScoreDisplay';
 import GuessRow from '@/components/GuessRow';
 import GuessTableHeader from '@/components/GuessTableHeader';
@@ -16,11 +16,10 @@ export default function Home() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(false);
   const [gameStartTime, setGameStartTime] = useState<Date | null>(null);
-  const [isDailyChallenge, setIsDailyChallenge] = useState(false);
-  const [showDailyChallenge, setShowDailyChallenge] = useState(true);
+  const [isDailyChallenge, setIsDailyChallenge] = useState(true);
 
   useEffect(() => {
-    startNewGame();
+    startNewGame(true); // Always start as daily challenge
   }, []);
 
   const startNewGame = async (isDaily: boolean = false) => {
@@ -41,7 +40,6 @@ export default function Home() {
         setGameState(result.gameState);
         setGameStartTime(new Date());
         setIsDailyChallenge(isDaily);
-        setShowDailyChallenge(!isDaily);
       }
     } catch (error) {
       console.error('Error starting new game:', error);
@@ -114,10 +112,6 @@ export default function Home() {
           <p className="text-lg text-gray-600">Guess the soccer player from the image!</p>
         </header>
 
-        {/* Daily Challenge */}
-        {showDailyChallenge && (
-          <DailyChallenge onStartDailyChallenge={() => startNewGame(true)} />
-        )}
 
         {/* Game Container */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -132,16 +126,16 @@ export default function Home() {
             <div className="space-y-6">
               {console.log('Rendering game, attempts length:', gameState.attempts?.length)}
               
-              {/* Guess Input - Always at top */}
-              {!gameState.gameWon && !gameState.gameLost && (
-                <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
-              )}
-
               {/* Player Media */}
               <MediaDisplay 
                 player={gameState.targetPlayer} 
                 revealed={gameState.gameWon || gameState.gameLost}
               />
+
+              {/* Guess Input - Below the image */}
+              {!gameState.gameWon && !gameState.gameLost && (
+                <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
+              )}
 
               {/* Wordle-style Guess Table - Only show if there are attempts */}
               {gameState.attempts && gameState.attempts.length > 0 && (
@@ -197,21 +191,13 @@ export default function Home() {
                     />
                   )}
                   
-                  <div className="text-center space-x-4">
+                  <div className="text-center">
                     <button 
-                      onClick={() => startNewGame(false)}
+                      onClick={() => startNewGame(true)}
                       className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Play Again
                     </button>
-                    {!isDailyChallenge && (
-                      <button 
-                        onClick={() => startNewGame(true)}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Daily Challenge
-                      </button>
-                    )}
                   </div>
                 </div>
               ) : gameState?.gameLost ? (
@@ -224,18 +210,12 @@ export default function Home() {
                       <PlayerCard player={gameState.targetPlayer} />
                     </div>
                   )}
-                  <div className="space-x-4">
+                  <div className="text-center">
                     <button 
-                      onClick={() => startNewGame(false)}
+                      onClick={() => startNewGame(true)}
                       className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Try Again
-                    </button>
-                    <button 
-                      onClick={() => startNewGame(true)}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Daily Challenge
                     </button>
                   </div>
                 </div>
