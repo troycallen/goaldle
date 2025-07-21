@@ -110,8 +110,8 @@ export default function Home() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <header className="text-center py-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">⚽ Goaldle</h1>
-          <p className="text-gray-600">Guess today's mystery soccer player</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">⚽ GOALDLE ⚽</h1>
+          <p className="text-gray-600">Guess today's mystery soccer player!</p>
         </header>
 
 
@@ -210,24 +210,23 @@ export default function Home() {
         <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mt-8">
           <h3 className="font-bold text-gray-800 mb-4 text-center">How to Play</h3>
           <div className="text-gray-600 text-sm space-y-3">
-            <p>1. Study the blurred image of today's mystery player</p>
-            <p>2. Guess any player name to see stat comparisons</p>
-            <p>3. Use the color coding to guide your next guess:</p>
+            <p>1. Study the blurred video of today's mystery player.</p>
+            <p>2. Guess any player name to see stat comparison and how close you are to the answer.</p>
+            <p>3. Use the color coding and hints from the video to guide your next guess.</p>
             <div className="flex justify-center space-x-6 mt-3">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-green-500 rounded-md"></div>
-                <span className="text-xs font-medium">Correct</span>
+                <span className="text-xs font-medium">CORRECT</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-yellow-500 rounded-md"></div>
-                <span className="text-xs font-medium">Close</span>
+                <span className="text-xs font-medium">CLOSE</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 bg-red-500 rounded-md"></div>
-                <span className="text-xs font-medium">Wrong</span>
+                <span className="text-xs font-medium">WRONG</span>
               </div>
             </div>
-            <p className="text-center mt-3 font-medium">You have 6 attempts to identify the player!</p>
           </div>
         </div>
       </div>
