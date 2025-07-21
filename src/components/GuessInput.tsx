@@ -77,7 +77,7 @@ export default function GuessInput({ onGuess, guess, setGuess }: GuessInputProps
                   key={index}
                   type="button"
                   onClick={() => handleSuggestionClick(player)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg text-black"
                 >
                   {player}
                 </button>
