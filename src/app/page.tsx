@@ -106,94 +106,128 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
         <header className="text-center py-8">
-          <h1 className="text-5xl font-bold text-green-700 mb-2">⚽ Goaldle</h1>
-          <p className="text-lg text-gray-600">Guess the soccer player from the image!</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">⚽ Goaldle</h1>
+          <p className="text-gray-600">Guess today's mystery soccer player</p>
         </header>
 
 
         {/* Game Container */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading game...</p>
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto"></div>
+              <p className="text-gray-500 mt-4 font-medium">Loading today's challenge...</p>
             </div>
           ) : gameState ? (
-            <div className="space-y-6">
-              {/* DEBUG INFO */}
-              <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
-                Debug: Won={String(gameState.gameWon)} | Lost={String(gameState.gameLost)} | Attempts={gameState.attempts?.length || 0}
-              </div>
-
-              {/* SIMPLE IMAGE */}
-              <div className="text-center">
-                <div className="w-80 h-80 mx-auto bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">MYSTERY PLAYER</span>
-                </div>
-              </div>
-
-              {/* SIMPLE INPUT - ALWAYS SHOW FOR NOW */}
-              <div className="space-y-4">
-                <input 
-                  type="text"
-                  value={guess}
-                  onChange={(e) => setGuess(e.target.value)}
-                  placeholder="Enter player name..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+            <div className="p-8 space-y-8">
+              {/* Player Image */}
+              {gameState.targetPlayer ? (
+                <MediaDisplay 
+                  player={gameState.targetPlayer} 
+                  revealed={gameState.gameWon || gameState.gameLost}
                 />
-                <button 
-                  onClick={() => handleGuess(guess)}
-                  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700"
-                >
-                  Submit Guess
-                </button>
-              </div>
-
-              {/* SIMPLE ATTEMPTS LIST */}
-              {gameState.attempts && gameState.attempts.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold">Attempts:</h3>
-                  {gameState.attempts.map((attempt, index) => (
-                    <div key={index} className="p-2 bg-gray-100 rounded">
-                      {attempt.playerName} - {attempt.isCorrect ? '✅ CORRECT!' : '❌ Wrong'}
+              ) : (
+                <div className="relative mx-auto max-w-sm">
+                  <div className="relative w-full h-80 rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
+                    <div className="flex items-center justify-center h-full text-gray-500 text-lg font-bold">
+                      ⚽ Loading player...
                     </div>
-                  ))}
+                  </div>
                 </div>
+              )}
+
+              {/* Game States */}
+              {gameState.gameWon ? (
+                /* GAME WON */
+                <div className="text-center space-y-6">
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+                    <h2 className="text-2xl font-bold text-green-800 mb-2">🎉 Correct!</h2>
+                    <p className="text-green-700 mb-4">You guessed it!</p>
+                    <div className="text-xl font-bold text-gray-800">
+                      {gameState.targetPlayer?.name}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => startNewGame(true)}
+                    className="bg-gray-800 text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors shadow-lg"
+                  >
+                    Play Again Tomorrow
+                  </button>
+                </div>
+              ) : gameState.gameLost ? (
+                /* GAME LOST */
+                <div className="text-center space-y-6">
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <h2 className="text-2xl font-bold text-red-800 mb-2">😔 Game Over</h2>
+                    <p className="text-red-700 mb-4">The answer was:</p>
+                    <div className="text-xl font-bold text-gray-800">
+                      {gameState.targetPlayer?.name}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => startNewGame(true)}
+                    className="bg-gray-800 text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors shadow-lg"
+                  >
+                    Try Again Tomorrow
+                  </button>
+                </div>
+              ) : (
+                /* PLAYING STATE */
+                <>
+                  <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
+                  
+                  {gameState.attempts && gameState.attempts.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="font-bold text-gray-800 text-center">Your Guesses</h3>
+                      <GuessTableHeader />
+                      <div className="space-y-1">
+                        {gameState.attempts.map((attempt, index) => (
+                          <GuessRow key={index} attempt={attempt} index={index} />
+                        ))}
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                          {gameState.attempts.length}/{gameState.maxAttempts} attempts
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (
-            <div className="text-center py-4">
-              <p className="text-gray-600">No game loaded</p>
+            <div className="text-center py-16">
+              <p className="text-gray-500">Failed to load game</p>
             </div>
           )}
         </div>
 
         {/* Instructions */}
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-800 mb-3 text-center">How to Play</h3>
-          <div className="text-blue-600 text-sm space-y-2">
-            <p>1. Study the blurred image of today&apos;s mystery player</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mt-8">
+          <h3 className="font-bold text-gray-800 mb-4 text-center">How to Play</h3>
+          <div className="text-gray-600 text-sm space-y-3">
+            <p>1. Study the blurred image of today's mystery player</p>
             <p>2. Guess any player name to see stat comparisons</p>
             <p>3. Use the color coding to guide your next guess:</p>
-            <div className="flex justify-center space-x-4 mt-2">
-              <div className="flex items-center space-x-1">
-                <div className="w-4 h-4 bg-green-500 rounded"></div>
-                <span className="text-xs">Correct</span>
+            <div className="flex justify-center space-x-6 mt-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-green-500 rounded-md"></div>
+                <span className="text-xs font-medium">Correct</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                <span className="text-xs">Close</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-yellow-500 rounded-md"></div>
+                <span className="text-xs font-medium">Close</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-4 h-4 bg-red-500 rounded"></div>
-                <span className="text-xs">Wrong</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-red-500 rounded-md"></div>
+                <span className="text-xs font-medium">Wrong</span>
               </div>
             </div>
-            <p className="text-center mt-2">4. You have 6 attempts to identify the player!</p>
+            <p className="text-center mt-3 font-medium">You have 6 attempts to identify the player!</p>
           </div>
         </div>
       </div>
