@@ -29,8 +29,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400',
-      description: 'Player in action during a match'
+      url: '/players/messi.svg',
+      description: 'Lionel Messi in Argentina colors'
     },
     hints: [
       'This player has won 8 Ballon d\'Or awards',
@@ -50,8 +50,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 7,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
-      description: 'Player celebrating a goal'
+      url: '/players/ronaldo.svg',
+      description: 'Cristiano Ronaldo celebrating'
     },
     hints: [
       'All-time top scorer in Champions League',
@@ -71,8 +71,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
-      description: 'Player dribbling with the ball'
+      url: '/players/mbappe.svg',
+      description: 'Kylian Mbappé in action'
     },
     hints: [
       'World Cup winner at age 19',
@@ -92,8 +92,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1544264555-32237ff83ba2?w=400',
-      description: 'Player preparing to take a shot'
+      url: '/players/haaland.svg',
+      description: 'Erling Haaland in Manchester City colors'
     },
     hints: [
       'Scored 52 goals in his debut Premier League season',
@@ -113,8 +113,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1577223078503-bc6de6f5dd42?w=400',
-      description: 'Player with skill moves'
+      url: '/players/default.svg',
+      description: 'Neymar showing his skills'
     },
     hints: [
       'Most expensive transfer in football history',
@@ -134,8 +134,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 17,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
-      description: 'Player making a pass'
+      url: '/players/default.svg',
+      description: 'Kevin De Bruyne creating a play'
     },
     hints: [
       'One of the best playmakers in the world',
@@ -155,8 +155,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 11,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400',
-      description: 'Player running with the ball'
+      url: '/players/default.svg',
+      description: 'Mohamed Salah on the attack'
     },
     hints: [
       'Known as the "Egyptian King"',
@@ -176,8 +176,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 4,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1556056654-c5bce0b59a21?w=400',
-      description: 'Player defending'
+      url: '/players/default.svg',
+      description: 'Virgil van Dijk defending'
     },
     hints: [
       'Most expensive defender in football history (at time of transfer)',
@@ -197,8 +197,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400',
-      description: 'Player controlling the ball'
+      url: '/players/default.svg',
+      description: 'Luka Modrić controlling the midfield'
     },
     hints: [
       'Ballon d\'Or winner in 2018',
@@ -218,8 +218,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
-      description: 'Player shooting'
+      url: '/players/default.svg',
+      description: 'Harry Kane taking a shot'
     },
     hints: [
       'England\'s all-time leading goalscorer',
