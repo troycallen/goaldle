@@ -26,26 +26,28 @@ export default function MediaDisplay({ player, revealed = false }: MediaDisplayP
   return (
     <div className="relative mx-auto max-w-3xl">
       <div className="relative w-full h-[32rem] rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-lg">
-        <img
-          src={media.url}
-          alt={revealed ? `${player.name}` : "Mystery player"}
-          className={`w-full h-full object-contain transition-all duration-700 ${
-            !revealed ? 'blur-lg grayscale brightness-50' : ''
-          }`}
-          onError={(e) => {
-            console.error('Image failed to load:', media.url);
-            e.currentTarget.style.display = 'none';
-            e.currentTarget.parentElement!.style.backgroundColor = '#6b7280';
-            e.currentTarget.parentElement!.innerHTML = '<div class="flex items-center justify-center h-full text-white text-lg font-bold">⚽ MYSTERY PLAYER</div>';
-          }}
-        />
-        {!revealed && (
-          <div className="absolute inset-0 bg-gray-900 bg-opacity-40 flex items-center justify-center">
-            <div className="text-white text-center bg-gray-800 bg-opacity-80 rounded-xl p-6 backdrop-blur-sm">
-              <div className="text-4xl mb-3">❓</div>
-              <p className="text-sm font-bold tracking-wide uppercase"></p>
-            </div>
-          </div>
+        {media.type === 'video' ? (
+          <video
+            src={media.url}
+            className="w-full h-full object-contain transition-all duration-700"
+            controls={revealed}
+            autoPlay={!revealed}
+            loop
+            muted={!revealed}
+            poster={media.thumbnail || ''}
+          />
+        ) : (
+          <img
+            src={media.url}
+            alt={revealed ? `${player.name}` : "Mystery player"}
+            className="w-full h-full object-contain transition-all duration-700"
+            onError={(e) => {
+              console.error('Image failed to load:', media.url);
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.style.backgroundColor = '#6b7280';
+              e.currentTarget.parentElement!.innerHTML = '<div class="flex items-center justify-center h-full text-white text-lg font-bold">⚽ MYSTERY PLAYER</div>';
+            }}
+          />
         )}
       </div>
     </div>

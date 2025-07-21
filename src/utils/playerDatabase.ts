@@ -227,6 +227,26 @@ export const PLAYERS: Player[] = [
       'Recently transferred to Bayern Munich',
       'Known for his clinical finishing'
     ]
+  },
+  {
+    id: '11',
+    name: 'Andy Robertson',
+    team: 'Liverpool',
+    position: 'Defender',
+    nationality: 'Scotland',
+    age: 30,
+    height: 183,
+    jerseyNumber: 26,
+    media: {
+      type: 'video',
+      url: '/players/andyrobertson.mp4',
+      description: 'Andy Robertson test video'
+    },
+    hints: [
+      'Known for his incredible crossing ability',
+      'Multiple Premier League winner',
+      'Scotland national team captain'
+    ]
   }
 ];
 
