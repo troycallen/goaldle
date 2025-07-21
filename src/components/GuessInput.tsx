@@ -54,7 +54,7 @@ export default function GuessInput({ onGuess, guess, setGuess }: GuessInputProps
   const handleSuggestionClick = (player: string) => {
     setGuess(player);
     setSuggestions([]);
-    onGuess(player);
+    // Don't auto-submit - let user click the Submit button
   };
 
   return (
