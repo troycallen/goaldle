@@ -26,6 +26,9 @@ export default function Home() {
   const startNewGame = async (isDaily: boolean = false) => {
     try {
       setLoading(true);
+      // Reset all state
+      setGameState(null);
+      setGuess('');
       const response = await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -34,6 +37,7 @@ export default function Home() {
       
       if (response.ok) {
         const result = await response.json();
+        console.log('Starting new game, result:', result);
         setGameState(result.gameState);
         setGameStartTime(new Date());
         setIsDailyChallenge(isDaily);
@@ -126,13 +130,36 @@ export default function Home() {
           
           {gameState?.targetPlayer && (
             <div className="space-y-6">
+              {console.log('Rendering game, attempts length:', gameState.attempts?.length)}
+              
+              {/* Guess Input - Always at top */}
+              {!gameState.gameWon && !gameState.gameLost && (
+                <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
+              )}
+
               {/* Player Media */}
               <MediaDisplay 
                 player={gameState.targetPlayer} 
                 revealed={gameState.gameWon || gameState.gameLost}
               />
 
-              {/* Progressive Hints */}
+              {/* Wordle-style Guess Table - Only show if there are attempts */}
+              {gameState.attempts && gameState.attempts.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
+                  <GuessTableHeader />
+                  <div className="space-y-0">
+                    {gameState.attempts.map((attempt, index) => (
+                      <GuessRow key={index} attempt={attempt} index={index} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-500 text-center">
+                    Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
+                  </p>
+                </div>
+              )}
+
+              {/* Progressive Hints - Only show if there are attempts */}
               {gameState.attempts.length > 0 && (
                 <div className="bg-blue-50 rounded-lg p-4">
                   <h3 className="font-semibold text-blue-800 mb-2">💡 Hints:</h3>
@@ -212,28 +239,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              ) : (
-                <>
-                  {/* Guess Input */}
-                  <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
-
-                  {/* Wordle-style Guess Table */}
-                  {gameState?.attempts && gameState.attempts.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
-                      <GuessTableHeader />
-                      <div className="space-y-0">
-                        {gameState.attempts.map((attempt, index) => (
-                          <GuessRow key={index} attempt={attempt} index={index} />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-500 text-center">
-                        Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
+              ) : null}
             </div>
           )}
         </div>

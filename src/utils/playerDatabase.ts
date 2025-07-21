@@ -29,7 +29,7 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: '/test-image.svg',
+      url: 'https://via.placeholder.com/400x400/ff0000/ffffff?text=MESSI',
       description: 'Test image for Lionel Messi'
     },
     hints: [

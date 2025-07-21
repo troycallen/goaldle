@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+// import Image from 'next/image'; // Temporarily using regular img for SVGs
 import { Player } from '@/utils/playerDatabase';
 
 interface MediaDisplayProps {
@@ -20,14 +20,12 @@ export default function MediaDisplay({ player, revealed = false }: MediaDisplayP
         <div className="relative mx-auto max-w-md">
           {media.type === 'image' ? (
             <div className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-              <Image
+              <img
                 src={media.url}
                 alt={revealed ? `${player.name}` : media.description}
-                fill
-                className={`object-cover transition-all duration-500 ${
+                className={`w-full h-full object-cover transition-all duration-500 ${
                   !revealed ? 'blur-md grayscale' : ''
                 }`}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               {!revealed && (
                 <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
