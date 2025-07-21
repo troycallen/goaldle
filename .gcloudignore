@@ -1,0 +1,5 @@
+# Ignore files for cloud deployment
+node_modules/
+.next/
+.git/
+*.log
