@@ -176,8 +176,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 4,
     media: {
       type: 'image',
-      url: '/players/default.svg',
-      description: 'Default test image'
+      url: '/players/vandijk.svg',
+      description: 'Virgil van Dijk test image'
     },
     hints: [
       'Most expensive defender in football history (at time of transfer)',
@@ -193,12 +193,12 @@ export const PLAYERS: Player[] = [
     position: 'Midfielder',
     nationality: 'Croatia',
     age: 39,
-    height: 172,
+    height: 172,  
     jerseyNumber: 10,
     media: {
       type: 'image',
-      url: '/players/default.svg',
-      description: 'Default test image'
+      url: '/players/modric.svg',
+      description: 'Luka Modrić test image'
     },
     hints: [
       'Ballon d\'Or winner in 2018',
@@ -218,8 +218,8 @@ export const PLAYERS: Player[] = [
     jerseyNumber: 9,
     media: {
       type: 'image',
-      url: '/players/default.svg',
-      description: 'Default test image'
+      url: '/players/kane.svg',
+      description: 'Harry Kane test image'
     },
     hints: [
       'England\'s all-time leading goalscorer',
