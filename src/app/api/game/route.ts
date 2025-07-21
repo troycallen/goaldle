@@ -14,7 +14,10 @@ export async function POST(request: NextRequest) {
           success: true,
           gameState: {
             ...gameState,
-            targetPlayer: undefined // Don't reveal the answer
+            targetPlayer: gameState.targetPlayer ? {
+              ...gameState.targetPlayer,
+              name: '[HIDDEN]' // Hide the name but keep other data for display
+            } : null
           }
         });
 
