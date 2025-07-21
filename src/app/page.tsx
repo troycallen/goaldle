@@ -117,66 +117,57 @@ export default function Home() {
 
         {/* Game Container */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          {loading && (
+          {loading ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
               <p className="text-gray-600 mt-2">Loading game...</p>
             </div>
-          )}
-          
-          {gameState?.targetPlayer && (
+          ) : gameState ? (
             <div className="space-y-6">
-              {/* Always show image */}
-              <MediaDisplay 
-                player={gameState.targetPlayer} 
-                revealed={gameState.gameWon || gameState.gameLost}
-              />
+              {/* DEBUG INFO */}
+              <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
+                Debug: Won={String(gameState.gameWon)} | Lost={String(gameState.gameLost)} | Attempts={gameState.attempts?.length || 0}
+              </div>
 
-              {/* Show different content based on game state */}
-              {gameState.gameWon ? (
-                /* GAME WON */
-                <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-green-600">🎉 You Won!</h2>
-                  <PlayerCard player={gameState.targetPlayer} isCorrect={true} />
-                  <button 
-                    onClick={() => startNewGame(true)}
-                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Play Again
-                  </button>
+              {/* SIMPLE IMAGE */}
+              <div className="text-center">
+                <div className="w-80 h-80 mx-auto bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">MYSTERY PLAYER</span>
                 </div>
-              ) : gameState.gameLost ? (
-                /* GAME LOST */
-                <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-red-600">😔 Game Over!</h2>
-                  <p className="text-gray-600">The correct answer was:</p>
-                  <PlayerCard player={gameState.targetPlayer} />
-                  <button 
-                    onClick={() => startNewGame(true)}
-                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              ) : (
-                /* PLAYING STATE */
-                <>
-                  <GuessInput onGuess={handleGuess} guess={guess} setGuess={setGuess} />
-                  
-                  {gameState.attempts && gameState.attempts.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-gray-700 text-center">Your Guesses</h3>
-                      <GuessTableHeader />
-                      {gameState.attempts.map((attempt, index) => (
-                        <GuessRow key={index} attempt={attempt} index={index} />
-                      ))}
-                      <p className="text-sm text-gray-500 text-center">
-                        Attempts: {gameState.attempts.length}/{gameState.maxAttempts}
-                      </p>
+              </div>
+
+              {/* SIMPLE INPUT - ALWAYS SHOW FOR NOW */}
+              <div className="space-y-4">
+                <input 
+                  type="text"
+                  value={guess}
+                  onChange={(e) => setGuess(e.target.value)}
+                  placeholder="Enter player name..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+                />
+                <button 
+                  onClick={() => handleGuess(guess)}
+                  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700"
+                >
+                  Submit Guess
+                </button>
+              </div>
+
+              {/* SIMPLE ATTEMPTS LIST */}
+              {gameState.attempts && gameState.attempts.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Attempts:</h3>
+                  {gameState.attempts.map((attempt, index) => (
+                    <div key={index} className="p-2 bg-gray-100 rounded">
+                      {attempt.playerName} - {attempt.isCorrect ? '✅ CORRECT!' : '❌ Wrong'}
                     </div>
-                  )}
-                </>
+                  ))}
+                </div>
               )}
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-600">No game loaded</p>
             </div>
           )}
         </div>
