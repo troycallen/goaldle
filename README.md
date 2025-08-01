@@ -28,27 +28,51 @@ A soccer/football player guessing game inspired by Wordle, where players guess t
 
 ## Installation & Setup
 
-1. **Install Dependencies**
+### Quick Start (Both Services)
+```bash
+# Windows
+start-dev.bat
+
+# macOS/Linux
+chmod +x start-dev.sh
+./start-dev.sh
+```
+
+### Manual Setup
+
+1. **Install Node.js Dependencies**
    ```bash
    npm install
    ```
 
-2. **Development Server**
+2. **Install Python Dependencies**
    ```bash
+   cd cv-api
+   pip install -r requirements.txt
+   cd ..
+   ```
+
+3. **Start Both Services**
+   ```bash
+   # Terminal 1: Start Python CV API
+   cd cv-api
+   python main.py
+   
+   # Terminal 2: Start Next.js Frontend
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000)
 
-3. **Production Build**
-   ```bash
-   npm run build
-   npm start
-   ```
+4. **Access the Application**
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - CV API: [http://localhost:8000](http://localhost:8000)
+   - API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## Tech Stack
 
 - **Next.js 15** with App Router and TypeScript
 - **Tailwind CSS** for styling
+- **Python FastAPI** for computer vision and image processing
+- **OpenCV** for image analysis and enhancement
 - **Curated Player Database** with high-quality images and hints
 - **Next.js API Routes** for backend functionality
 
@@ -68,12 +92,26 @@ A soccer/football player guessing game inspired by Wordle, where players guess t
 - **Progressive Hints**: Career achievements and facts unlock with each guess
 - **Score & Stats**: Performance tracking with sharing capabilities
 
+## Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Frontend│    │  Next.js API    │    │  Python CV API  │
+│   (TypeScript)  │◄──►│   (TypeScript)  │◄──►│   (FastAPI)     │
+│                 │    │                 │    │                 │
+│ - Game UI       │    │ - Game State    │    │ - Image Analysis│
+│ - Player Input  │    │ - Player Data   │    │ - Video Processing│
+│ - Score Display │    │ - Authentication│    │ - AI Models     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
 ## Future Enhancements
 
-- Expanded player database with real sports API integration
-- Custom trained ML model for better player recognition
-- Multiplayer modes and leaderboards
-- Mobile app version
-- Video clip analysis
+- **Computer Vision Integration**: Real-time image analysis and enhancement
+- **Machine Learning Models**: Custom trained models for player recognition
+- **Video Processing**: Analyze player video clips for better hints
+- **Expanded Database**: Real sports API integration with more players
+- **Multiplayer Features**: Leaderboards and social features
+- **Mobile App**: Native mobile application
 
 Built with ❤️ for soccer fans who love a good challenge!
