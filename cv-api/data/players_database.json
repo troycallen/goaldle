@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Didier Drogba",
+    "team": "Chelsea",
+    "position": "Striker",
+    "nationality": "Ivory Coast",
+    "age": 46,
+    "height": "188cm"
+  },
+  {
+    "name": "Lionel Messi",
+    "team": "Inter Miami",
+    "position": "Forward",
+    "nationality": "Argentina", 
+    "age": 36,
+    "height": "170cm"
+  },
+  {
+    "name": "Mohamed Salah",
+    "team": "Liverpool",
+    "position": "Forward",
+    "nationality": "Egypt",
+    "age": 31,
+    "height": "175cm"
+  },
+  {
+    "name": "Son Heung-min",
+    "team": "Tottenham",
+    "position": "Forward",
+    "nationality": "South Korea",
+    "age": 31,
+    "height": "183cm"
+  },
+  {
+    "name": "Tatsuya Itō",
+    "team": "Hamburger SV",
+    "position": "Midfielder",
+    "nationality": "Japan",
+    "age": 25,
+    "height": "170cm"
+  },
+  {
+    "name": "Lamine Yamal",
+    "team": "Barcelona",
+    "position": "Forward",
+    "nationality": "Spain",
+    "age": 16,
+    "height": "178cm"
+  }
+]
