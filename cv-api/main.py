@@ -53,7 +53,7 @@ class GoaldleCV:
                 for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
                     x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
                     conf = float(box.conf[0].cpu().numpy())
-                    if conf > 0.5:
+                    if conf > 0.3:  # Lower threshold to catch more players
                         # Get segmentation mask
                         mask_data = mask.data[0].cpu().numpy()  # Shape: (H, W)
                         detections.append((x1, y1, x2, y2, conf, mask_data))
@@ -118,7 +118,7 @@ class GoaldleCV:
         
         return intersection / union if union > 0 else 0.0
     
-    def blur_players(self, frame, tracks, effect_type="blur", color=(0, 0, 0), target_zone="all"):
+    def blur_players(self, frame, tracks):
         result = frame.copy()
         h, w = frame.shape[:2]
         
@@ -129,47 +129,25 @@ class GoaldleCV:
             else:
                 mask_resized = mask
             
-            # Convert to binary mask with smoothing
-            binary_mask = (mask_resized > 0.5).astype(np.uint8)
+            # Convert to binary mask with better processing
+            binary_mask = (mask_resized > 0.3).astype(np.uint8)  # Lower threshold for better coverage
             
-            # Smooth mask edges to reduce flickering
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
-            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (3, 3), 0)
-            binary_mask = (binary_mask > 0.5).astype(np.uint8)
+            # Enhanced morphological operations to fill gaps and smooth
+            kernel_small = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+            kernel_large = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
             
-            # Check if player should be processed based on zone
-            should_process = True
-            if target_zone == "goal_area":
-                # Only process players in goal area (roughly bottom 1/3 and sides)
-                center_x = (x1 + x2) // 2
-                center_y = (y1 + y2) // 2
-                in_goal_area = (center_y > h * 0.6) or (center_x < w * 0.2) or (center_x > w * 0.8)
-                should_process = in_goal_area
-            elif target_zone == "center_field":
-                # Only process players in center area
-                center_x = (x1 + x2) // 2
-                center_y = (y1 + y2) // 2
-                in_center = (w * 0.3 < center_x < w * 0.7) and (h * 0.3 < center_y < h * 0.7)
-                should_process = in_center
+            # Fill small holes and gaps
+            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel_small)
+            # Dilate slightly to ensure full body coverage
+            binary_mask = cv2.dilate(binary_mask, kernel_small, iterations=2)
+            # Fill larger holes
+            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel_large)
+            # Smooth the edges
+            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (5, 5), 0)
+            binary_mask = (binary_mask > 0.3).astype(np.uint8)
             
-            if not should_process:
-                continue
-                
-            if effect_type == "blur":
-                # Apply Gaussian blur
-                blurred_frame = cv2.GaussianBlur(frame, (51, 51), 0)
-                result = np.where(binary_mask[..., np.newaxis], blurred_frame, result)
-            
-            elif effect_type == "color":
-                # Apply solid color
-                colored_frame = result.copy()
-                colored_frame[binary_mask == 1] = color  # BGR format
-                result = colored_frame
-            
-            elif effect_type == "silhouette":
-                # Black silhouette
-                result[binary_mask == 1] = [0, 0, 0]
+            # Apply black silhouette
+            result[binary_mask == 1] = [0, 0, 0]
         
         return result
     
@@ -200,7 +178,7 @@ class GoaldleCV:
                 
                 # Process frame
                 tracks = self.detect_and_track(frame)
-                processed_frame = self.blur_players(frame, tracks, "silhouette")
+                processed_frame = self.blur_players(frame, tracks)
                 out.write(processed_frame)
                 
                 frame_count += 1
