@@ -33,28 +33,48 @@
             margin: 0 0 30px 0;
             width: 100vw;
             margin-left: calc(-50vw + 50%);
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
         
         h1 {
-            text-align: center;
             font-size: 2.5rem;
-            margin: 0 0 10px 0;
+            margin: 0;
             font-weight: 700;
             color: #e2e8f0;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+            flex-grow: 1;
+            text-align: center;
         }
         
-        .subtitle {
-            text-align: center;
-            font-size: 1.1rem;
-            margin: 0;
-            color: #a0aec0;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+        .nav-links {
+            display: flex;
+            gap: 20px;
         }
+        
+        .nav-link {
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        
         
         .game-container {
             display: flex;
@@ -350,7 +370,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>⚽ Goaldle ⚽</h1>
+            <div class="header-content">
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Help</a>
+                    <a href="#" class="nav-link">FAQ</a>
+                </div>
+                <h1>⚽ Goaldle ⚽</h1>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Contact</a>
+                </div>
+            </div>
         </div>
         
         <div class="game-container">
