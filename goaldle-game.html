@@ -293,16 +293,16 @@
         <div class="game-container">
             <!-- Video Section -->
             <div class="video-section">
-                <div style="text-align: center; margin-bottom: 1rem;">
-                    <button id="startGameBtn" class="btn">Start New Game</button>
-                </div>
                 <div id="videoStatus" class="status hidden"></div>
                 
-                <div id="videoDisplay" class="hidden" style="margin-top: 1rem;">
+                <div id="videoDisplay" style="margin-top: 1rem;">
                     <video id="gameVideo" controls></video>
                     <div id="videoInfo" style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;"></div>
                 </div>
                 
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button id="newGameBtn" class="btn">New Game</button>
+                </div>
             </div>
             
             <!-- Game Section -->
@@ -317,7 +317,6 @@
                     <input type="text" id="playerGuess" class="guess-input" placeholder="Enter player name..." autocomplete="off">
                     <div id="suggestions" class="suggestions-list hidden"></div>
                     <button id="submitGuess" class="btn">Submit Guess</button>
-                    <button id="newGameBtn" class="btn secondary">New Game</button>
                 </div>
                 
                 <div id="winMessage" class="win-message hidden">
@@ -345,7 +344,6 @@
 
     <script>
         // DOM elements
-        const startGameBtn = document.getElementById('startGameBtn');
         const videoStatus = document.getElementById('videoStatus');
         const videoDisplay = document.getElementById('videoDisplay');
         const gameVideo = document.getElementById('gameVideo');
@@ -378,10 +376,10 @@
             }
         }
 
-        // Start new game with backend videos
-        startGameBtn.addEventListener('click', async () => {
+        // Start/restart game function
+        async function startNewGame() {
             showStatus('Starting new game...', 'loading');
-            startGameBtn.disabled = true;
+            newGameBtn.disabled = true;
 
             try {
                 const response = await fetch('http://localhost:8000/game/start-with-video', {
@@ -395,10 +393,12 @@
                     if (result.video_data.original_video) {
                         displayVideo(result.video_data.original_video, gameVideo);
                         
-                        // Show video info
-                        videoInfo.textContent = `Goal by ${result.video_data.player_name}`;
-                        showVideoDisplay();
+                        // Hide video info during game
+                        videoInfo.textContent = "";
                     }
+                    
+                    // Reset all game state
+                    resetGameUI();
                     
                     // Start game
                     currentGame = result.game_state;
@@ -410,9 +410,21 @@
             } catch (error) {
                 showStatus(`Failed to start game: ${error.message}`, 'error');
             } finally {
-                startGameBtn.disabled = false;
+                newGameBtn.disabled = false;
             }
-        });
+        }
+
+        // Reset game UI
+        function resetGameUI() {
+            guesses.innerHTML = '';
+            guessesContainer.classList.add('hidden');
+            winMessage.classList.add('hidden');
+            loseMessage.classList.add('hidden');
+            gameControls.classList.remove('hidden');
+            guessesRemaining.textContent = '6';
+            playerGuess.value = '';
+            suggestions.classList.add('hidden');
+        }
 
         // Helper function to display video from base64
         function displayVideo(base64Video, videoElement) {
@@ -544,37 +556,7 @@
         }
 
         // New game button - starts completely new game
-        newGameBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('http://localhost:8000/game/start-with-video', {
-                    method: 'POST'
-                });
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Display new video
-                    if (result.video_data.original_video) {
-                        displayVideo(result.video_data.original_video, gameVideo);
-                        videoInfo.textContent = `Goal by ${result.video_data.player_name}`;
-                    }
-                    
-                    // Reset UI
-                    guesses.innerHTML = '';
-                    guessesContainer.classList.add('hidden');
-                    winMessage.classList.add('hidden');
-                    loseMessage.classList.add('hidden');
-                    gameControls.classList.remove('hidden');
-                    guessesRemaining.textContent = '6';
-                    
-                    currentGame = result.game_state;
-                    hideStatus();
-                } else {
-                    showStatus(`Error: ${result.error}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`Failed to start new game: ${error.message}`, 'error');
-            }
-        });
+        newGameBtn.addEventListener('click', startNewGame);
 
         // UI helper functions
         function showStatus(message, type) {
@@ -587,9 +569,6 @@
             videoStatus.classList.add('hidden');
         }
 
-        function showVideoDisplay() {
-            videoDisplay.classList.remove('hidden');
-        }
 
         function showGame() {
             gameInfo.classList.remove('hidden');
@@ -605,8 +584,13 @@
         }
 
 
-        // Initialize
-        loadPlayers();
+        // Initialize - auto-load first game
+        async function initialize() {
+            await loadPlayers();
+            await startNewGame();
+        }
+        
+        initialize();
     </script>
 </body>
 </html>
