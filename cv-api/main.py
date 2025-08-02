@@ -46,12 +46,13 @@ app.add_middleware(
 class MinimalCV:
     def __init__(self):
         self.yolo = YOLO('yolov8n-seg.pt')  # Segmentation model for precise masks
-        self.tracks = defaultdict(lambda: {'bbox': None, 'mask': None, 'frames': 0})
+        self.tracks = defaultdict(lambda: {'bbox': None, 'mask': None, 'centroid': None, 'frames': 0})
         self.next_id = 0
+        self.max_disappeared = 15  # Keep tracks for 15 frames when not detected
     
     def detect_and_track(self, frame):
-        # YOLOv8 segmentation
-        results = self.yolo(frame, classes=[0])  # person class
+        # YOLOv8 segmentation (disable visualization)
+        results = self.yolo(frame, classes=[0], verbose=False)  # person class
         detections = []
         
         for result in results:
@@ -64,36 +65,44 @@ class MinimalCV:
                         mask_data = mask.data[0].cpu().numpy()  # Shape: (H, W)
                         detections.append((x1, y1, x2, y2, conf, mask_data))
         
-        # Simple tracking
+        # Improved tracking with centroids
         current_tracks = []
         for det in detections:
             x1, y1, x2, y2, conf, mask = det
+            centroid = ((x1 + x2) // 2, (y1 + y2) // 2)
+            
             best_match = None
-            best_iou = 0.3
+            best_distance = float('inf')
             
             for track_id, track in self.tracks.items():
-                if track['bbox']:
-                    iou = self.iou((x1, y1, x2, y2), track['bbox'])
-                    if iou > best_iou:
-                        best_iou = iou
+                if track['centroid'] and track['frames'] < self.max_disappeared:
+                    # Use both centroid distance and IOU
+                    dist = ((centroid[0] - track['centroid'][0])**2 + (centroid[1] - track['centroid'][1])**2)**0.5
+                    iou = self.iou((x1, y1, x2, y2), track['bbox']) if track['bbox'] else 0
+                    
+                    # Combined score: prefer close centroids with decent IOU
+                    if dist < 100 and iou > 0.2 and dist < best_distance:
+                        best_distance = dist
                         best_match = track_id
             
             if best_match:
                 self.tracks[best_match]['bbox'] = (x1, y1, x2, y2)
                 self.tracks[best_match]['mask'] = mask
+                self.tracks[best_match]['centroid'] = centroid
                 self.tracks[best_match]['frames'] = 0
                 current_tracks.append((x1, y1, x2, y2, best_match, mask))
             else:
                 track_id = self.next_id
                 self.next_id += 1
-                self.tracks[track_id] = {'bbox': (x1, y1, x2, y2), 'mask': mask, 'frames': 0}
+                self.tracks[track_id] = {'bbox': (x1, y1, x2, y2), 'mask': mask, 'centroid': centroid, 'frames': 0}
                 current_tracks.append((x1, y1, x2, y2, track_id, mask))
         
-        # Clean stale tracks
+        # Clean stale tracks - but keep them longer to reduce blinking
         for track_id in list(self.tracks.keys()):
-            self.tracks[track_id]['frames'] += 1
-            if self.tracks[track_id]['frames'] > 30:
-                del self.tracks[track_id]
+            if track_id not in [t[4] for t in current_tracks]:  # Not in current detections
+                self.tracks[track_id]['frames'] += 1
+                if self.tracks[track_id]['frames'] > self.max_disappeared:
+                    del self.tracks[track_id]
         
         return current_tracks
     
@@ -116,7 +125,7 @@ class MinimalCV:
         
         return intersection / union if union > 0 else 0.0
     
-    def blur_players(self, frame, tracks, effect_type="blur", color=(0, 0, 0)):
+    def blur_players(self, frame, tracks, effect_type="blur", color=(0, 0, 0), target_zone="all"):
         result = frame.copy()
         h, w = frame.shape[:2]
         
@@ -127,9 +136,33 @@ class MinimalCV:
             else:
                 mask_resized = mask
             
-            # Convert to binary mask
+            # Convert to binary mask with smoothing
             binary_mask = (mask_resized > 0.5).astype(np.uint8)
             
+            # Smooth mask edges to reduce flickering
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (3, 3), 0)
+            binary_mask = (binary_mask > 0.5).astype(np.uint8)
+            
+            # Check if player should be processed based on zone
+            should_process = True
+            if target_zone == "goal_area":
+                # Only process players in goal area (roughly bottom 1/3 and sides)
+                center_x = (x1 + x2) // 2
+                center_y = (y1 + y2) // 2
+                in_goal_area = (center_y > h * 0.6) or (center_x < w * 0.2) or (center_x > w * 0.8)
+                should_process = in_goal_area
+            elif target_zone == "center_field":
+                # Only process players in center area
+                center_x = (x1 + x2) // 2
+                center_y = (y1 + y2) // 2
+                in_center = (w * 0.3 < center_x < w * 0.7) and (h * 0.3 < center_y < h * 0.7)
+                should_process = in_center
+            
+            if not should_process:
+                continue
+                
             if effect_type == "blur":
                 # Apply Gaussian blur
                 blurred_frame = cv2.GaussianBlur(frame, (51, 51), 0)
@@ -147,7 +180,7 @@ class MinimalCV:
         
         return result
     
-    def process_video(self, video_bytes, effect_type="blur", color=(0, 0, 255)):
+    def process_video(self, video_bytes):
         try:
             # Save video
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as f:
@@ -174,7 +207,7 @@ class MinimalCV:
                 
                 # Process frame
                 tracks = self.detect_and_track(frame)
-                processed_frame = self.blur_players(frame, tracks, effect_type, color)
+                processed_frame = self.blur_players(frame, tracks, "silhouette")
                 out.write(processed_frame)
                 
                 frame_count += 1
@@ -208,19 +241,12 @@ async def root():
     return {"message": "GoalDle CV API", "status": "ready"}
 
 @app.post("/process-video")
-async def process_video(file: UploadFile = File(...), effect: str = "blur", color: str = "255,0,0"):
+async def process_video(file: UploadFile = File(...)):
     if not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="Must be video file")
     
-    # Parse color (BGR format)
-    try:
-        b, g, r = map(int, color.split(','))
-        color_bgr = (b, g, r)
-    except:
-        color_bgr = (0, 0, 255)  # Default red
-    
     contents = await file.read()
-    result = cv.process_video(contents, effect, color_bgr)
+    result = cv.process_video(contents)
     return JSONResponse(content=result)
 
 if __name__ == "__main__":
