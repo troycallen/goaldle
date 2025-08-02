@@ -1,9 +1,9 @@
-# Minimal GoalDle CV API
+# Goaldle CV API
 import subprocess
 import sys
 import os
 
-# Auto-install dependencies if missing
+# install dependencies
 def install_deps():
     try:
         import cv2
@@ -20,7 +20,7 @@ def install_deps():
 
 install_deps()
 
-# Now import everything
+# import everything
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -32,26 +32,19 @@ from datetime import datetime
 from ultralytics import YOLO
 from collections import defaultdict
 
+# create app and add cors
 app = FastAPI(title="GoalDle CV API", version="1.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=False)
 
-# CORS - Allow all origins including file:// URLs
-app.add_middleware(
-    CORSMiddleware, 
-    allow_origins=["*"], 
-    allow_methods=["*"], 
-    allow_headers=["*"],
-    allow_credentials=False
-)
-
-class MinimalCV:
+class GoaldleCV:
     def __init__(self):
-        self.yolo = YOLO('yolov8n-seg.pt')  # Segmentation model for precise masks
+        self.yolo = YOLO('yolov8n-seg.pt')  
         self.tracks = defaultdict(lambda: {'bbox': None, 'mask': None, 'centroid': None, 'frames': 0})
         self.next_id = 0
-        self.max_disappeared = 15  # Keep tracks for 15 frames when not detected
+        self.max_disappeared = 15  
     
     def detect_and_track(self, frame):
-        # YOLOv8 segmentation (disable visualization)
+        # YOLOv8 segmentation
         results = self.yolo(frame, classes=[0], verbose=False)  # person class
         detections = []
         
@@ -234,7 +227,7 @@ class MinimalCV:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-cv = MinimalCV()
+cv = GoaldleCV()
 
 @app.get("/")
 async def root():
