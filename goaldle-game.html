@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goaldle - Wordle for Football Goals</title>
+    <title>Goaldle</title>
     <style>
         * {
             margin: 0;
@@ -12,8 +12,8 @@
         }
         
         body {
-            background: #2d3748;
-            color: #f7fafc;
+            background: #1a202c;
+            color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
             padding: 20px;
@@ -23,6 +23,12 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+        }
+        
+        .header {
+            border-bottom: 3px solid #4a5568;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         h1 {
@@ -48,11 +54,9 @@
         }
         
         .video-section, .game-section {
-            background: #4a5568;
-            border-radius: 12px;
+            background: #2d3748;
             padding: 25px;
             margin-bottom: 20px;
-            border: 1px solid #718096;
         }
         
         .section-title {
@@ -78,16 +82,19 @@
         .btn {
             background: #3182ce;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
+            border: 2px solid #2c5282;
+            padding: 8px 12px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s;
             margin-bottom: 15px;
-            min-width: 140px;
-            max-width: 280px;
+            min-width: 45px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn:hover:not(:disabled) {
@@ -97,6 +104,15 @@
         .btn:disabled {
             background: #a0aec0;
             cursor: not-allowed;
+        }
+
+        .btn.give-up {
+            background: #e53e3e;
+            border-color: #c53030;
+        }
+
+        .btn.give-up:hover:not(:disabled) {
+            background: #c53030;
         }
         
         .status {
@@ -120,11 +136,10 @@
         
         video {
             width: 100%;
-            max-width: 900px;
-            height: 500px;
+            max-width: 1100px;
+            height: 600px;
             margin: 0 auto;
             display: block;
-            border-radius: 8px;
             background: #000;
             object-fit: contain;
         }
@@ -133,10 +148,9 @@
             width: 100%;
             max-width: 500px;
             padding: 12px;
-            background: #2d3748;
-            border: 2px solid #718096;
-            border-radius: 6px;
-            color: #e2e8f0;
+            background: #1a202c;
+            border: 2px solid #e53e3e;
+            color: #ffffff;
             margin-bottom: 15px;
             font-size: 16px;
             margin-left: auto;
@@ -150,7 +164,7 @@
         
         .guess-input:focus {
             outline: none;
-            border-color: #3182ce;
+            border-color: #e53e3e;
         }
         
         .guesses-container {
@@ -169,32 +183,35 @@
         
         .guess-cell {
             aspect-ratio: 2.5 / 1;
-            background: #718096;
-            border-radius: 4px;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             font-size: 14px;
             text-align: center;
-            border: 1px solid #4a5568;
+            border: 2px solid #000000;
             min-height: 40px;
             padding: 8px;
+            color: #000000;
         }
         
         .guess-cell.exact {
             background: #38a169;
-            border-color: #2f855a;
+            border-color: #000000;
+            color: #ffffff;
         }
         
         .guess-cell.partial {
             background: #d69e2e;
-            border-color: #b7791f;
+            border-color: #000000;
+            color: #ffffff;
         }
         
         .guess-cell.none {
             background: #718096;
-            border-color: #4a5568;
+            border-color: #000000;
+            color: #ffffff;
         }
         
         
@@ -269,55 +286,51 @@
 
         .attribute-header {
             padding: 10px;
-            background: #4a5568;
-            border-radius: 4px;
-            border: 1px solid #718096;
+            background: #3182ce;
+            border: 2px solid #000000;
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⚽ Goaldle ⚽</h1>
+        <div class="header">
+            <h1>⚽ Goaldle ⚽</h1>
+        </div>
         
         <div class="game-container">
             <!-- Video Section -->
             <div class="video-section">
                 <div id="videoStatus" class="status hidden"></div>
                 
-                <div id="videoDisplay" style="margin-top: 0.5rem;">
+                <div id="videoDisplay" style="margin-top: 0.5rem; position: relative;">
                     <video id="gameVideo" controls></video>
-                    <div id="videoInfo" style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;"></div>
+                    <button id="giveUpBtn" class="btn give-up" style="position: absolute; bottom: -70px; left: 25px;">❌</button>
+                    <button id="restartBtn" class="btn" style="position: absolute; bottom: -70px; right: 25px;">🔄</button>
+                    <div id="videoInfo" style="text-align: center; margin-top: 3rem; font-size: 0.9rem; opacity: 0.8;"></div>
                 </div>
                 
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button id="newGameBtn" class="btn">New Game</button>
-                </div>
+                
             </div>
             
             <!-- Game Section -->
             <div class="game-section">
                 
-                <div id="gameInfo" class="game-info hidden">
-                    <div class="remaining">Guesses remaining: <span id="guessesRemaining">6</span></div>
-                </div>
                 
                 <div id="gameControls" class="hidden">
                     <input type="text" id="playerGuess" class="guess-input" placeholder="Enter player name..." autocomplete="off">
                     <div id="suggestions" class="suggestions-list hidden"></div>
-                    <div style="text-align: center;">
-                        <button id="submitGuess" class="btn">Submit Guess</button>
-                    </div>
                 </div>
                 
                 <div id="winMessage" class="win-message hidden">
-                    🎉 Congratulations! You guessed correctly!
+                    You guessed correctly!
                 </div>
                 
                 <div id="loseMessage" class="lose-message hidden">
-                    😔 Game Over! The answer was: <span id="correctAnswer"></span>
+                    Game Over! The answer was: <span id="correctAnswer"></span>
                 </div>
                 
-                <div id="guessesContainer" class="guesses-container hidden">
+                <div id="guessesContainer" class="guesses-container">
                     <div class="attribute-headers">
                         <div class="attribute-header">Name</div>
                         <div class="attribute-header">Team</div>
@@ -326,7 +339,57 @@
                         <div class="attribute-header">Age</div>
                         <div class="attribute-header">Height</div>
                     </div>
-                    <div id="guesses"></div>
+                    <div id="guesses">
+                        <!-- Initial empty rows like Wordle -->
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                        <div class="guess-row">
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                            <div class="guess-cell"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -339,13 +402,11 @@
         const gameVideo = document.getElementById('gameVideo');
         const videoInfo = document.getElementById('videoInfo');
         
-        const gameInfo = document.getElementById('gameInfo');
         const gameControls = document.getElementById('gameControls');
         const playerGuess = document.getElementById('playerGuess');
         const suggestions = document.getElementById('suggestions');
-        const submitGuess = document.getElementById('submitGuess');
-        const newGameBtn = document.getElementById('newGameBtn');
-        const guessesRemaining = document.getElementById('guessesRemaining');
+        const restartBtn = document.getElementById('restartBtn');
+        const giveUpBtn = document.getElementById('giveUpBtn');
         const guessesContainer = document.getElementById('guessesContainer');
         const guesses = document.getElementById('guesses');
         const winMessage = document.getElementById('winMessage');
@@ -354,6 +415,7 @@
 
         let availablePlayers = [];
         let currentGame = null;
+        let currentGuessRow = 0;
 
         // Load available players
         async function loadPlayers() {
@@ -369,7 +431,8 @@
         // Start/restart game function
         async function startNewGame() {
             showStatus('Starting new game...', 'loading');
-            newGameBtn.disabled = true;
+            restartBtn.disabled = true;
+            giveUpBtn.disabled = true;
 
             try {
                 const response = await fetch('http://localhost:8000/game/start-with-video', {
@@ -400,20 +463,30 @@
             } catch (error) {
                 showStatus(`Failed to start game: ${error.message}`, 'error');
             } finally {
-                newGameBtn.disabled = false;
+                restartBtn.disabled = false;
+                giveUpBtn.disabled = false;
             }
         }
 
         // Reset game UI
         function resetGameUI() {
-            guesses.innerHTML = '';
-            guessesContainer.classList.add('hidden');
+            // Clear all guess rows back to empty
+            const rows = guesses.querySelectorAll('.guess-row');
+            rows.forEach(row => {
+                row.querySelectorAll('.guess-cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.className = 'guess-cell';
+                });
+            });
+            
             winMessage.classList.add('hidden');
             loseMessage.classList.add('hidden');
             gameControls.classList.remove('hidden');
-            guessesRemaining.textContent = '6';
             playerGuess.value = '';
             suggestions.classList.add('hidden');
+            
+            // Reset current guess counter
+            currentGuessRow = 0;
         }
 
         // Helper function to display video from base64
@@ -453,10 +526,11 @@
         function selectPlayer(playerName) {
             playerGuess.value = playerName;
             suggestions.classList.add('hidden');
+            // Automatically submit the guess
+            makeGuess();
         }
 
-        // Submit guess
-        submitGuess.addEventListener('click', makeGuess);
+        // Submit guess on Enter key
         playerGuess.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') makeGuess();
         });
@@ -488,23 +562,22 @@
         }
 
         function displayGuess(guessResult) {
-            const row = document.createElement('div');
-            row.className = 'guess-row';
+            const rows = guesses.querySelectorAll('.guess-row');
+            const currentRow = rows[currentGuessRow];
             
-            guessResult.comparisons.forEach(comp => {
-                const cell = document.createElement('div');
-                cell.className = `guess-cell ${comp.status}`;
-                cell.textContent = comp.guess_value;
-                row.appendChild(cell);
-            });
-            
-            guesses.appendChild(row);
-            guessesContainer.classList.remove('hidden');
+            if (currentRow) {
+                const cells = currentRow.querySelectorAll('.guess-cell');
+                guessResult.comparisons.forEach((comp, index) => {
+                    if (cells[index]) {
+                        cells[index].textContent = comp.guess_value;
+                        cells[index].className = `guess-cell ${comp.status}`;
+                    }
+                });
+                currentGuessRow++;
+            }
         }
 
-        function updateGameState(result) {
-            guessesRemaining.textContent = result.guesses_remaining;
-            
+        function updateGameState(result) {            
             if (result.is_winner) {
                 winMessage.classList.remove('hidden');
                 gameControls.classList.add('hidden');
@@ -533,8 +606,31 @@
             }
         }
 
-        // New game button - starts completely new game
-        newGameBtn.addEventListener('click', startNewGame);
+        // Give up function
+        async function giveUp() {
+            if (!currentGame) return;
+            
+            try {
+                // Show the reveal (same as when game ends)
+                await showVideoReveal();
+                
+                // Show lose message with correct answer
+                const response = await fetch('http://localhost:8000/game/video-reveal');
+                const result = await response.json();
+                
+                if (result.success) {
+                    correctAnswer.textContent = result.reveal_data.goal_info.player_name;
+                    loseMessage.classList.remove('hidden');
+                    gameControls.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Failed to give up:', error);
+            }
+        }
+
+        // Button event listeners
+        restartBtn.addEventListener('click', startNewGame);
+        giveUpBtn.addEventListener('click', giveUp);
 
         // UI helper functions
         function showStatus(message, type) {
@@ -549,14 +645,11 @@
 
 
         function showGame() {
-            gameInfo.classList.remove('hidden');
             gameControls.classList.remove('hidden');
         }
 
         function hideGame() {
-            gameInfo.classList.add('hidden');
             gameControls.classList.add('hidden');
-            guessesContainer.classList.add('hidden');
             winMessage.classList.add('hidden');
             loseMessage.classList.add('hidden');
         }
