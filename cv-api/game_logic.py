@@ -12,7 +12,7 @@ class ComparisonResult:
     hint: str = ""
 
 class GoaldleGame:
-    def __init__(self, players_db_path: str = "data/players_database.json"):
+    def __init__(self, players_db_path: str = "data/players_db.json"):
         with open(players_db_path, 'r', encoding='utf-8') as f:
             self.players = json.load(f)
         
@@ -23,7 +23,7 @@ class GoaldleGame:
             "Tottenham": "Premier League",
             "Barcelona": "La Liga",
             "Inter Miami": "MLS",
-            "Hamburger SV": "2. Bundesliga"
+            "Kawasaki Frontale": "J1 League"
         }
         
         # Country to continent mapping
