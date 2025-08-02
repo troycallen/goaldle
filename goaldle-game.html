@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goaldle - Wordle for Football Goals</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #059669 100%);
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .video-section, .game-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .file-input:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn.secondary {
+            background: #059669;
+        }
+        
+        .btn.secondary:hover:not(:disabled) {
+            background: #047857;
+        }
+        
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .status.loading {
+            background: rgba(59, 130, 246, 0.3);
+        }
+        
+        .status.error {
+            background: rgba(220, 38, 38, 0.3);
+        }
+        
+        .status.success {
+            background: rgba(5, 150, 105, 0.3);
+        }
+        
+        video {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .guess-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .guess-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .guess-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        
+        .guesses-container {
+            margin-top: 1rem;
+        }
+        
+        .guess-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .guess-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .guess-cell.exact {
+            background: #059669;
+            border-color: #047857;
+        }
+        
+        .guess-cell.partial {
+            background: #f59e0b;
+            border-color: #d97706;
+        }
+        
+        .guess-cell.none {
+            background: #6b7280;
+            border-color: #4b5563;
+        }
+        
+        .guess-cell .value {
+            font-size: 0.7rem;
+            line-height: 1.1;
+        }
+        
+        .guess-cell .hint {
+            position: absolute;
+            bottom: 1px;
+            left: 1px;
+            right: 1px;
+            font-size: 0.5rem;
+            opacity: 0.8;
+            background: rgba(0,0,0,0.3);
+            padding: 1px;
+            border-radius: 2px;
+        }
+        
+        .game-info {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .game-info .remaining {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .win-message, .lose-message {
+            text-align: center;
+            padding: 2rem;
+            margin: 1rem 0;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .win-message {
+            background: rgba(5, 150, 105, 0.3);
+            border: 2px solid #059669;
+        }
+        
+        .lose-message {
+            background: rgba(220, 38, 38, 0.3);
+            border: 2px solid #dc2626;
+        }
+        
+        .player-suggestion {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            margin: 0.2rem 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .player-suggestion:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .suggestions-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
+        }
+
+        .attribute-headers {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .attribute-header {
+            padding: 0.3rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Goaldle</h1>
+        <p class="subtitle">Wordle meets Football - Watch the blurred goal and guess the player!</p>
+        
+        <div class="game-container">
+            <!-- Video Section -->
+            <div class="video-section">
+                <h2 class="section-title">Step 1: Upload Goal Video</h2>
+                <input type="file" id="videoFile" accept="video/*" class="file-input">
+                <button id="processBtn" class="btn" disabled>Process Video & Start Game</button>
+                <div id="videoStatus" class="status hidden"></div>
+                
+                <div id="videoDisplay" class="hidden" style="margin-top: 1rem;">
+                    <video id="blurredVideo" controls></video>
+                </div>
+            </div>
+            
+            <!-- Game Section -->
+            <div class="game-section">
+                <h2 class="section-title">Step 2: Guess the Player</h2>
+                
+                <div id="gameInfo" class="game-info hidden">
+                    <div class="remaining">Guesses remaining: <span id="guessesRemaining">6</span></div>
+                </div>
+                
+                <div id="gameControls" class="hidden">
+                    <input type="text" id="playerGuess" class="guess-input" placeholder="Enter player name..." autocomplete="off">
+                    <div id="suggestions" class="suggestions-list hidden"></div>
+                    <button id="submitGuess" class="btn">Submit Guess</button>
+                    <button id="newGameBtn" class="btn secondary">New Game (Same Video)</button>
+                </div>
+                
+                <div id="winMessage" class="win-message hidden">
+                    🎉 Congratulations! You guessed correctly!
+                </div>
+                
+                <div id="loseMessage" class="lose-message hidden">
+                    😔 Game Over! The answer was: <span id="correctAnswer"></span>
+                </div>
+                
+                <div id="guessesContainer" class="guesses-container hidden">
+                    <div class="attribute-headers">
+                        <div class="attribute-header">Name</div>
+                        <div class="attribute-header">Team</div>
+                        <div class="attribute-header">Position</div>
+                        <div class="attribute-header">Country</div>
+                        <div class="attribute-header">Age</div>
+                        <div class="attribute-header">Height</div>
+                    </div>
+                    <div id="guesses"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const videoFile = document.getElementById('videoFile');
+        const processBtn = document.getElementById('processBtn');
+        const videoStatus = document.getElementById('videoStatus');
+        const videoDisplay = document.getElementById('videoDisplay');
+        const blurredVideo = document.getElementById('blurredVideo');
+        
+        const gameInfo = document.getElementById('gameInfo');
+        const gameControls = document.getElementById('gameControls');
+        const playerGuess = document.getElementById('playerGuess');
+        const suggestions = document.getElementById('suggestions');
+        const submitGuess = document.getElementById('submitGuess');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const guessesRemaining = document.getElementById('guessesRemaining');
+        const guessesContainer = document.getElementById('guessesContainer');
+        const guesses = document.getElementById('guesses');
+        const winMessage = document.getElementById('winMessage');
+        const loseMessage = document.getElementById('loseMessage');
+        const correctAnswer = document.getElementById('correctAnswer');
+
+        let selectedFile = null;
+        let availablePlayers = [];
+        let currentGame = null;
+
+        // File selection
+        videoFile.addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            processBtn.disabled = !selectedFile;
+            hideStatus();
+            hideGame();
+        });
+
+        // Load available players
+        async function loadPlayers() {
+            try {
+                const response = await fetch('http://localhost:8000/game/players');
+                const data = await response.json();
+                availablePlayers = data.players;
+            } catch (error) {
+                console.error('Failed to load players:', error);
+            }
+        }
+
+        // Process video and start game
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            showStatus('Processing video and starting game...', 'loading');
+            processBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('http://localhost:8000/game/integrate-video', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Display blurred video
+                    const byteCharacters = atob(result.video_result.blurred_video);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'video/mp4' });
+                    const videoUrl = URL.createObjectURL(blob);
+                    
+                    blurredVideo.src = videoUrl;
+                    showVideoDisplay();
+                    
+                    // Start game
+                    currentGame = result.game_state;
+                    showGame();
+                    showStatus('Game started! Watch the video and make your guess.', 'success');
+                } else {
+                    showStatus(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Failed to process: ${error.message}`, 'error');
+            } finally {
+                processBtn.disabled = false;
+            }
+        });
+
+        // Player input with autocomplete
+        playerGuess.addEventListener('input', (e) => {
+            const value = e.target.value.toLowerCase();
+            if (value.length > 0) {
+                const filtered = availablePlayers.filter(player => 
+                    player.toLowerCase().includes(value)
+                ).slice(0, 5);
+                
+                if (filtered.length > 0) {
+                    suggestions.innerHTML = filtered.map(player => 
+                        `<div class="player-suggestion" onclick="selectPlayer('${player}')">${player}</div>`
+                    ).join('');
+                    suggestions.classList.remove('hidden');
+                } else {
+                    suggestions.classList.add('hidden');
+                }
+            } else {
+                suggestions.classList.add('hidden');
+            }
+        });
+
+        function selectPlayer(playerName) {
+            playerGuess.value = playerName;
+            suggestions.classList.add('hidden');
+        }
+
+        // Submit guess
+        submitGuess.addEventListener('click', makeGuess);
+        playerGuess.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') makeGuess();
+        });
+
+        async function makeGuess() {
+            const player = playerGuess.value.trim();
+            if (!player) return;
+
+            try {
+                const response = await fetch('http://localhost:8000/game/guess', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_name: player })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayGuess(result.guess_result);
+                    updateGameState(result);
+                    playerGuess.value = '';
+                    suggestions.classList.add('hidden');
+                } else {
+                    showStatus(`Error: ${result.detail}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Failed to submit guess: ${error.message}`, 'error');
+            }
+        }
+
+        function displayGuess(guessResult) {
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+            
+            guessResult.comparisons.forEach(comp => {
+                const cell = document.createElement('div');
+                cell.className = `guess-cell ${comp.status}`;
+                
+                const value = document.createElement('div');
+                value.className = 'value';
+                value.textContent = comp.guess_value;
+                cell.appendChild(value);
+                
+                if (comp.hint) {
+                    const hint = document.createElement('div');
+                    hint.className = 'hint';
+                    hint.textContent = comp.hint;
+                    cell.appendChild(hint);
+                }
+                
+                row.appendChild(cell);
+            });
+            
+            guesses.appendChild(row);
+            guessesContainer.classList.remove('hidden');
+        }
+
+        function updateGameState(result) {
+            guessesRemaining.textContent = result.guesses_remaining;
+            
+            if (result.is_winner) {
+                winMessage.classList.remove('hidden');
+                gameControls.classList.add('hidden');
+            } else if (result.game_over) {
+                correctAnswer.textContent = result.target_player.name;
+                loseMessage.classList.remove('hidden');
+                gameControls.classList.add('hidden');
+            }
+        }
+
+        // New game (same video)
+        newGameBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:8000/game/new', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                // Reset UI
+                guesses.innerHTML = '';
+                guessesContainer.classList.add('hidden');
+                winMessage.classList.add('hidden');
+                loseMessage.classList.add('hidden');
+                gameControls.classList.remove('hidden');
+                guessesRemaining.textContent = '6';
+                
+                showStatus('New game started with the same video!', 'success');
+            } catch (error) {
+                showStatus(`Failed to start new game: ${error.message}`, 'error');
+            }
+        });
+
+        // UI helper functions
+        function showStatus(message, type) {
+            videoStatus.textContent = message;
+            videoStatus.className = `status ${type}`;
+            videoStatus.classList.remove('hidden');
+        }
+
+        function hideStatus() {
+            videoStatus.classList.add('hidden');
+        }
+
+        function showVideoDisplay() {
+            videoDisplay.classList.remove('hidden');
+        }
+
+        function showGame() {
+            gameInfo.classList.remove('hidden');
+            gameControls.classList.remove('hidden');
+        }
+
+        function hideGame() {
+            gameInfo.classList.add('hidden');
+            gameControls.classList.add('hidden');
+            guessesContainer.classList.add('hidden');
+            winMessage.classList.add('hidden');
+            loseMessage.classList.add('hidden');
+        }
+
+        // Initialize
+        loadPlayers();
+    </script>
+</body>
+</html>

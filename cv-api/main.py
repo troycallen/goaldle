@@ -25,6 +25,7 @@ install_deps()
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import cv2
 import numpy as np
 import base64
@@ -33,6 +34,7 @@ from datetime import datetime
 from ultralytics import YOLO
 from collections import defaultdict
 from scipy.optimize import linear_sum_assignment
+from game_logic import GoaldleGame
 
 # create app and add cors
 app = FastAPI(title="GoalDle CV API", version="1.0")
@@ -326,7 +328,13 @@ class HybridGoaldleCV:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+# Initialize CV and Game instances
 cv = HybridGoaldleCV()
+game = GoaldleGame()
+
+# Pydantic models for API
+class GuessRequest(BaseModel):
+    player_name: str
 
 @app.get("/")
 async def root():
@@ -347,6 +355,74 @@ async def reset_tracking():
     global cv
     cv = HybridGoaldleCV()
     return {"message": "Tracking reset successfully"}
+
+# Game endpoints
+@app.post("/game/new")
+async def new_game():
+    """Start a new Goaldle game"""
+    try:
+        result = game.start_new_game()
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/game/guess")
+async def make_guess(request: GuessRequest):
+    """Make a guess in the current game"""
+    try:
+        result = game.make_guess(request.player_name)
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/game/state")
+async def get_game_state():
+    """Get current game state"""
+    try:
+        result = game.get_game_state()
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/game/players")
+async def get_players():
+    """Get list of all available players for autocomplete"""
+    try:
+        players = game.get_available_players()
+        return JSONResponse(content={"players": players})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/game/integrate-video")
+async def integrate_video_with_game(file: UploadFile = File(...)):
+    """Process video, blur players, and start a new game"""
+    try:
+        if not file.content_type.startswith("video/"):
+            raise HTTPException(status_code=400, detail="Must be video file")
+        
+        # Process the video
+        contents = await file.read()
+        video_result = cv.process_video(contents)
+        
+        if not video_result["success"]:
+            raise HTTPException(status_code=500, detail=f"Video processing failed: {video_result['error']}")
+        
+        # Start a new game
+        game_result = game.start_new_game()
+        
+        return JSONResponse(content={
+            "success": True,
+            "video_result": {
+                "blurred_video": video_result["blurred_video"],
+                "video_info": video_result["video_info"]
+            },
+            "game_state": game_result,
+            "hint": "Watch the blurred video and guess which player is performing the goal!"
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
