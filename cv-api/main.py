@@ -442,8 +442,7 @@ async def start_game_with_video():
         return JSONResponse(content={
             "success": True,
             "game_state": game_result,
-            "video_data": video_data,
-            "hint": "Watch the video and guess the player!"
+            "video_data": video_data
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
