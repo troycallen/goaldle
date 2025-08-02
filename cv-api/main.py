@@ -1,4 +1,4 @@
-# Minimal GoalDle CV API - Everything in one file
+# Minimal GoalDle CV API
 import subprocess
 import sys
 import os
@@ -45,27 +45,29 @@ app.add_middleware(
 
 class MinimalCV:
     def __init__(self):
-        self.yolo = YOLO('yolov8n.pt')
-        self.tracks = defaultdict(lambda: {'bbox': None, 'frames': 0})
+        self.yolo = YOLO('yolov8n-seg.pt')  # Segmentation model for precise masks
+        self.tracks = defaultdict(lambda: {'bbox': None, 'mask': None, 'frames': 0})
         self.next_id = 0
     
     def detect_and_track(self, frame):
-        # YOLOv8 detection
+        # YOLOv8 segmentation
         results = self.yolo(frame, classes=[0])  # person class
         detections = []
         
         for result in results:
-            if result.boxes is not None:
-                for box in result.boxes:
+            if result.boxes is not None and result.masks is not None:
+                for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
                     x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
                     conf = float(box.conf[0].cpu().numpy())
                     if conf > 0.5:
-                        detections.append((x1, y1, x2, y2, conf))
+                        # Get segmentation mask
+                        mask_data = mask.data[0].cpu().numpy()  # Shape: (H, W)
+                        detections.append((x1, y1, x2, y2, conf, mask_data))
         
         # Simple tracking
         current_tracks = []
         for det in detections:
-            x1, y1, x2, y2, conf = det
+            x1, y1, x2, y2, conf, mask = det
             best_match = None
             best_iou = 0.3
             
@@ -78,13 +80,14 @@ class MinimalCV:
             
             if best_match:
                 self.tracks[best_match]['bbox'] = (x1, y1, x2, y2)
+                self.tracks[best_match]['mask'] = mask
                 self.tracks[best_match]['frames'] = 0
-                current_tracks.append((x1, y1, x2, y2, best_match))
+                current_tracks.append((x1, y1, x2, y2, best_match, mask))
             else:
                 track_id = self.next_id
                 self.next_id += 1
-                self.tracks[track_id] = {'bbox': (x1, y1, x2, y2), 'frames': 0}
-                current_tracks.append((x1, y1, x2, y2, track_id))
+                self.tracks[track_id] = {'bbox': (x1, y1, x2, y2), 'mask': mask, 'frames': 0}
+                current_tracks.append((x1, y1, x2, y2, track_id, mask))
         
         # Clean stale tracks
         for track_id in list(self.tracks.keys()):
@@ -113,25 +116,38 @@ class MinimalCV:
         
         return intersection / union if union > 0 else 0.0
     
-    def blur_players(self, frame, tracks):
-        blurred = frame.copy()
-        for x1, y1, x2, y2, track_id in tracks:
-            # Expand region
-            margin = 20
-            x1 = max(0, x1 - margin)
-            y1 = max(0, y1 - margin)
-            x2 = min(frame.shape[1], x2 + margin)
-            y2 = min(frame.shape[0], y2 + margin)
-            
-            if x2 > x1 and y2 > y1:
-                roi = blurred[y1:y2, x1:x2]
-                if roi.size > 0:
-                    blurred_roi = cv2.GaussianBlur(roi, (51, 51), 0)
-                    blurred[y1:y2, x1:x2] = blurred_roi
+    def blur_players(self, frame, tracks, effect_type="blur", color=(0, 0, 0)):
+        result = frame.copy()
+        h, w = frame.shape[:2]
         
-        return blurred
+        for x1, y1, x2, y2, track_id, mask in tracks:
+            # Resize mask to frame size if needed
+            if mask.shape != (h, w):
+                mask_resized = cv2.resize(mask, (w, h), interpolation=cv2.INTER_NEAREST)
+            else:
+                mask_resized = mask
+            
+            # Convert to binary mask
+            binary_mask = (mask_resized > 0.5).astype(np.uint8)
+            
+            if effect_type == "blur":
+                # Apply Gaussian blur
+                blurred_frame = cv2.GaussianBlur(frame, (51, 51), 0)
+                result = np.where(binary_mask[..., np.newaxis], blurred_frame, result)
+            
+            elif effect_type == "color":
+                # Apply solid color
+                colored_frame = result.copy()
+                colored_frame[binary_mask == 1] = color  # BGR format
+                result = colored_frame
+            
+            elif effect_type == "silhouette":
+                # Black silhouette
+                result[binary_mask == 1] = [0, 0, 0]
+        
+        return result
     
-    def process_video(self, video_bytes, blur_strength=51):
+    def process_video(self, video_bytes, effect_type="blur", color=(0, 0, 255)):
         try:
             # Save video
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as f:
@@ -158,8 +174,8 @@ class MinimalCV:
                 
                 # Process frame
                 tracks = self.detect_and_track(frame)
-                blurred_frame = self.blur_players(frame, tracks)
-                out.write(blurred_frame)
+                processed_frame = self.blur_players(frame, tracks, effect_type, color)
+                out.write(processed_frame)
                 
                 frame_count += 1
                 if frame_count % 30 == 0:
@@ -192,12 +208,19 @@ async def root():
     return {"message": "GoalDle CV API", "status": "ready"}
 
 @app.post("/process-video")
-async def process_video(file: UploadFile = File(...)):
+async def process_video(file: UploadFile = File(...), effect: str = "blur", color: str = "255,0,0"):
     if not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="Must be video file")
     
+    # Parse color (BGR format)
+    try:
+        b, g, r = map(int, color.split(','))
+        color_bgr = (b, g, r)
+    except:
+        color_bgr = (0, 0, 255)  # Default red
+    
     contents = await file.read()
-    result = cv.process_video(contents)
+    result = cv.process_video(contents, effect, color_bgr)
     return JSONResponse(content=result)
 
 if __name__ == "__main__":

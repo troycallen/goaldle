@@ -126,7 +126,22 @@
         <div class="upload-section">
             <h2>Upload Goal Video</h2>
             <input type="file" id="videoFile" accept="video/*" class="file-input">
-            <button id="processBtn" class="process-btn" disabled>Blur Players</button>
+            
+            <div style="margin: 1rem 0;">
+                <label style="display: block; margin-bottom: 0.5rem;">Effect:</label>
+                <select id="effectType" style="padding: 0.5rem; border-radius: 4px; background: #374151; color: white; border: 1px solid #6b7280;">
+                    <option value="blur">Blur</option>
+                    <option value="color">Color Fill</option>
+                    <option value="silhouette">Black Silhouette</option>
+                </select>
+            </div>
+            
+            <div id="colorPicker" style="margin: 1rem 0;" class="hidden">
+                <label style="display: block; margin-bottom: 0.5rem;">Color:</label>
+                <input type="color" id="colorInput" value="#ff0000" style="padding: 0.25rem; border-radius: 4px;">
+            </div>
+            
+            <button id="processBtn" class="process-btn" disabled>Process Video</button>
             <div id="status" class="status hidden"></div>
         </div>
         
@@ -144,6 +159,9 @@
         const videoSection = document.getElementById('videoSection');
         const blurredVideo = document.getElementById('blurredVideo');
         const downloadBtn = document.getElementById('downloadBtn');
+        const effectType = document.getElementById('effectType');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorInput = document.getElementById('colorInput');
 
         let selectedFile = null;
 
@@ -152,6 +170,14 @@
             processBtn.disabled = !selectedFile;
             hideStatus();
             hideVideoSection();
+        });
+
+        effectType.addEventListener('change', (e) => {
+            if (e.target.value === 'color') {
+                colorPicker.classList.remove('hidden');
+            } else {
+                colorPicker.classList.add('hidden');
+            }
         });
 
         processBtn.addEventListener('click', async () => {
@@ -163,8 +189,16 @@
             try {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
+                
+                // Convert hex color to BGR
+                const hexColor = colorInput.value;
+                const r = parseInt(hexColor.substr(1, 2), 16);
+                const g = parseInt(hexColor.substr(3, 2), 16);
+                const b = parseInt(hexColor.substr(5, 2), 16);
+                const bgrColor = `${b},${g},${r}`;
 
-                const response = await fetch('http://localhost:8000/process-video', {
+                const url = `http://localhost:8000/process-video?effect=${effectType.value}&color=${bgrColor}`;
+                const response = await fetch(url, {
                     method: 'POST',
                     body: formData,
                 });
