@@ -180,17 +180,20 @@
             object-fit: contain;
         }
         
+        #gameControls {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto 15px auto;
+        }
+        
         .guess-input {
             width: 100%;
-            max-width: 500px;
             padding: 12px;
             background: #1a202c;
             border: 2px solid #e53e3e;
             color: #ffffff;
-            margin-bottom: 15px;
             font-size: 16px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0;
             display: block;
         }
         
@@ -299,12 +302,17 @@
         }
         
         .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
             max-height: 200px;
             overflow-y: auto;
             border-radius: 4px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            background: #2d3748;
+            border: 2px solid #4a5568;
+            z-index: 10;
+            width: 100%;
         }
 
         .attribute-headers {
@@ -520,11 +528,12 @@
         // Load available players
         async function loadPlayers() {
             try {
-                const response = await fetch('http://localhost:8000/game/players');
+                const response = await fetch('http://localhost:8001/game/players');
                 const data = await response.json();
                 availablePlayers = data.players;
             } catch (error) {
                 console.error('Failed to load players:', error);
+                showStatus('Failed to load players. Check if server is running on port 8001.', 'error');
             }
         }
 
@@ -535,7 +544,7 @@
             giveUpBtn.disabled = true;
 
             try {
-                const response = await fetch('http://localhost:8000/game/start-with-video', {
+                const response = await fetch('http://localhost:8001/game/start-with-video', {
                     method: 'POST'
                 });
 
@@ -640,7 +649,7 @@
             if (!player) return;
 
             try {
-                const response = await fetch('http://localhost:8000/game/guess', {
+                const response = await fetch('http://localhost:8001/game/guess', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ player_name: player })
@@ -654,7 +663,8 @@
                     playerGuess.value = '';
                     suggestions.classList.add('hidden');
                 } else {
-                    showStatus(`Error: ${result.detail}`, 'error');
+                    console.error('Server error response:', result);
+                    showStatus(`Error: ${result.detail || result.error || 'Unknown server error'}`, 'error');
                 }
             } catch (error) {
                 showStatus(`Failed to submit guess: ${error.message}`, 'error');
@@ -693,7 +703,7 @@
         // Show video reveal after game ends - replace the current video
         async function showVideoReveal() {
             try {
-                const response = await fetch('http://localhost:8000/game/video-reveal');
+                const response = await fetch('http://localhost:8001/game/video-reveal');
                 const result = await response.json();
                 
                 if (result.success && result.reveal_data.videos.original_video) {
@@ -715,7 +725,7 @@
                 await showVideoReveal();
                 
                 // Show lose message with correct answer
-                const response = await fetch('http://localhost:8000/game/video-reveal');
+                const response = await fetch('http://localhost:8001/game/video-reveal');
                 const result = await response.json();
                 
                 if (result.success) {
