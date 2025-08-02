@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "video": "cv-api/goals/drogba.mp4",
+    "scorer": "Didier Drogba"
+  },
+  {
+    "id": "2",
+    "video": "cv-api/goals/messi.mp4", 
+    "scorer": "Lionel Messi"
+  },
+  { 
+    "id": "3",
+    "video": "cv-api/goals/salah.mp4",
+    "scorer": "Mohamed Salah"
+  },
+  {
+    "id": "4",
+    "video": "cv-api/goals/son.mp4",
+    "scorer": "Son Heung-min"
+  },
+  {
+    "id": "5",
+    "video": "cv-api/goals/tatsuya_ito.mp4",
+    "scorer": "Tatsuya Itō"
+  },
+  {
+    "id": "6",
+    "video": "cv-api/goals/yaman.mp4",
+    "scorer": "Lamine Yamal"
+  }
+] 
