@@ -1,7 +1,8 @@
 import json
 import random
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 from dataclasses import dataclass
+from video_manager import VideoManager
 
 @dataclass
 class ComparisonResult:
@@ -15,6 +16,9 @@ class GoaldleGame:
     def __init__(self, players_db_path: str = "data/players_db.json"):
         with open(players_db_path, 'r', encoding='utf-8') as f:
             self.players = json.load(f)
+        
+        # Initialize video manager
+        self.video_manager = VideoManager()
         
         # Team to league mapping for partial matches
         self.team_leagues = {
@@ -37,17 +41,33 @@ class GoaldleGame:
         }
         
         self.target_player = None
+        self.current_goal = None
         self.guesses = []
         self.max_guesses = 6
         
     def start_new_game(self) -> Dict[str, Any]:
-        """Start a new game with a random target player"""
-        self.target_player = random.choice(self.players)
+        """Start a new game with a random target player and corresponding video"""
+        # Get a random goal
+        available_goals = self.video_manager.get_all_goals()
+        self.current_goal = random.choice(available_goals)
+        
+        # Find the corresponding player
+        target_player_name = self.current_goal["scorer"]
+        self.target_player = self.get_player_by_name(target_player_name)
+        
+        if not self.target_player:
+            raise ValueError(f"Player {target_player_name} not found in players database")
+        
         self.guesses = []
+        
         return {
             "message": "New game started!",
             "max_guesses": self.max_guesses,
-            "attributes": ["name", "team", "position", "nationality", "age", "height"]
+            "attributes": ["name", "team", "position", "nationality", "age", "height"],
+            "goal_info": {
+                "id": self.current_goal["id"],
+                "player_name": self.current_goal["scorer"]
+            }
         }
     
     def get_player_by_name(self, name: str) -> Dict[str, Any]:
@@ -207,3 +227,24 @@ class GoaldleGame:
     def get_available_players(self) -> List[str]:
         """Get list of all player names for autocomplete"""
         return [player["name"] for player in self.players]
+    
+    def get_current_video(self) -> Optional[Dict[str, Any]]:
+        """Get the current goal's video information"""
+        if not self.current_goal:
+            return None
+        
+        return self.video_manager.get_video_pair(self.current_goal)
+    
+    def get_video_reveal(self) -> Optional[Dict[str, Any]]:
+        """Get both blurred and original videos for reveal"""
+        if not self.current_goal:
+            return None
+            
+        video_pair = self.video_manager.get_video_pair(self.current_goal)
+        return {
+            "goal_info": {
+                "id": self.current_goal["id"],
+                "player_name": self.current_goal["scorer"]
+            },
+            "videos": video_pair
+        }

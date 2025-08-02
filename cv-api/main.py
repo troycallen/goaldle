@@ -336,6 +336,7 @@ game = GoaldleGame()
 class GuessRequest(BaseModel):
     player_name: str
 
+
 @app.get("/")
 async def root():
     return {"message": "GoalDle CV API - Hybrid Approach", "status": "ready"}
@@ -395,9 +396,61 @@ async def get_players():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/game/current-video")
+async def get_current_video():
+    """Get the current game's video (blurred version)"""
+    try:
+        video_data = game.get_current_video()
+        if not video_data:
+            raise HTTPException(status_code=404, detail="No active game or video not found")
+        
+        return JSONResponse(content={
+            "success": True,
+            "video_data": video_data
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/game/video-reveal")
+async def get_video_reveal():
+    """Get both original and blurred videos for reveal"""
+    try:
+        reveal_data = game.get_video_reveal()
+        if not reveal_data:
+            raise HTTPException(status_code=404, detail="No active game")
+        
+        return JSONResponse(content={
+            "success": True,
+            "reveal_data": reveal_data
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/game/start-with-video")
+async def start_game_with_video():
+    """Start a new game and get the video"""
+    try:
+        # Start new game
+        game_result = game.start_new_game()
+        
+        # Get the video for this game
+        video_data = game.get_current_video()
+        
+        if not video_data:
+            raise HTTPException(status_code=500, detail="Failed to load video for game")
+        
+        return JSONResponse(content={
+            "success": True,
+            "game_state": game_result,
+            "video_data": video_data,
+            "hint": "Watch the video and guess the player!"
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/game/integrate-video")
 async def integrate_video_with_game(file: UploadFile = File(...)):
-    """Process video, blur players, and start a new game"""
+    """Process video, blur players, and start a new game (legacy endpoint)"""
     try:
         if not file.content_type.startswith("video/"):
             raise HTTPException(status_code=400, detail="Must be video file")

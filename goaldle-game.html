@@ -39,16 +39,10 @@
         }
         
         .game-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 2rem;
             margin-bottom: 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .game-container {
-                grid-template-columns: 1fr;
-            }
         }
         
         .video-section, .game-section {
@@ -297,19 +291,26 @@
         <div class="game-container">
             <!-- Video Section -->
             <div class="video-section">
-                <h2 class="section-title">Step 1: Upload Goal Video</h2>
-                <input type="file" id="videoFile" accept="video/*" class="file-input">
-                <button id="processBtn" class="btn" disabled>Process Video & Start Game</button>
+                <h2 class="section-title">Goal Video</h2>
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <button id="startGameBtn" class="btn">Start New Game</button>
+                </div>
                 <div id="videoStatus" class="status hidden"></div>
                 
                 <div id="videoDisplay" class="hidden" style="margin-top: 1rem;">
-                    <video id="blurredVideo" controls></video>
+                    <video id="gameVideo" controls></video>
+                    <div id="videoInfo" style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;"></div>
+                </div>
+                
+                <div id="revealSection" class="hidden" style="margin-top: 1rem;">
+                    <h3 style="text-align: center; margin-bottom: 0.5rem;">🎬 Original Video Reveal</h3>
+                    <video id="originalVideo" controls></video>
                 </div>
             </div>
             
             <!-- Game Section -->
             <div class="game-section">
-                <h2 class="section-title">Step 2: Guess the Player</h2>
+                <h2 class="section-title">Guess the Player</h2>
                 
                 <div id="gameInfo" class="game-info hidden">
                     <div class="remaining">Guesses remaining: <span id="guessesRemaining">6</span></div>
@@ -347,11 +348,13 @@
 
     <script>
         // DOM elements
-        const videoFile = document.getElementById('videoFile');
-        const processBtn = document.getElementById('processBtn');
+        const startGameBtn = document.getElementById('startGameBtn');
         const videoStatus = document.getElementById('videoStatus');
         const videoDisplay = document.getElementById('videoDisplay');
-        const blurredVideo = document.getElementById('blurredVideo');
+        const gameVideo = document.getElementById('gameVideo');
+        const videoInfo = document.getElementById('videoInfo');
+        const revealSection = document.getElementById('revealSection');
+        const originalVideo = document.getElementById('originalVideo');
         
         const gameInfo = document.getElementById('gameInfo');
         const gameControls = document.getElementById('gameControls');
@@ -366,17 +369,8 @@
         const loseMessage = document.getElementById('loseMessage');
         const correctAnswer = document.getElementById('correctAnswer');
 
-        let selectedFile = null;
         let availablePlayers = [];
         let currentGame = null;
-
-        // File selection
-        videoFile.addEventListener('change', (e) => {
-            selectedFile = e.target.files[0];
-            processBtn.disabled = !selectedFile;
-            hideStatus();
-            hideGame();
-        });
 
         // Load available players
         async function loadPlayers() {
@@ -389,51 +383,55 @@
             }
         }
 
-        // Process video and start game
-        processBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-
-            showStatus('Processing video and starting game...', 'loading');
-            processBtn.disabled = true;
+        // Start new game with backend videos
+        startGameBtn.addEventListener('click', async () => {
+            showStatus('Starting new game...', 'loading');
+            startGameBtn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-
-                const response = await fetch('http://localhost:8000/game/integrate-video', {
-                    method: 'POST',
-                    body: formData,
+                const response = await fetch('http://localhost:8000/game/start-with-video', {
+                    method: 'POST'
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    // Display blurred video
-                    const byteCharacters = atob(result.video_result.blurred_video);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    // Display video
+                    if (result.video_data.original_video) {
+                        displayVideo(result.video_data.original_video, gameVideo);
+                        
+                        // Show video info
+                        videoInfo.textContent = `Goal by ${result.video_data.player_name}`;
+                        showVideoDisplay();
                     }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], { type: 'video/mp4' });
-                    const videoUrl = URL.createObjectURL(blob);
-                    
-                    blurredVideo.src = videoUrl;
-                    showVideoDisplay();
                     
                     // Start game
                     currentGame = result.game_state;
                     showGame();
-                    showStatus('Game started! Watch the video and make your guess.', 'success');
+                    hideReveal();
+                    showStatus(result.hint, 'success');
                 } else {
-                    showStatus(`Error: ${result.error}`, 'error');
+                    showStatus(`Error: ${result.error || 'Failed to start game'}`, 'error');
                 }
             } catch (error) {
-                showStatus(`Failed to process: ${error.message}`, 'error');
+                showStatus(`Failed to start game: ${error.message}`, 'error');
             } finally {
-                processBtn.disabled = false;
+                startGameBtn.disabled = false;
             }
         });
+
+        // Helper function to display video from base64
+        function displayVideo(base64Video, videoElement) {
+            const byteCharacters = atob(base64Video);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'video/mp4' });
+            const videoUrl = URL.createObjectURL(blob);
+            videoElement.src = videoUrl;
+        }
 
         // Player input with autocomplete
         playerGuess.addEventListener('input', (e) => {
@@ -526,30 +524,59 @@
             if (result.is_winner) {
                 winMessage.classList.remove('hidden');
                 gameControls.classList.add('hidden');
+                showVideoReveal();
             } else if (result.game_over) {
                 correctAnswer.textContent = result.target_player.name;
                 loseMessage.classList.remove('hidden');
                 gameControls.classList.add('hidden');
+                showVideoReveal();
             }
         }
 
-        // New game (same video)
+        // Show video reveal after game ends
+        async function showVideoReveal() {
+            try {
+                const response = await fetch('http://localhost:8000/game/video-reveal');
+                const result = await response.json();
+                
+                if (result.success && result.reveal_data.videos.original_video) {
+                    displayVideo(result.reveal_data.videos.original_video, originalVideo);
+                    revealSection.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Failed to load video reveal:', error);
+            }
+        }
+
+        // New game button - starts completely new game
         newGameBtn.addEventListener('click', async () => {
             try {
-                const response = await fetch('http://localhost:8000/game/new', {
+                const response = await fetch('http://localhost:8000/game/start-with-video', {
                     method: 'POST'
                 });
                 const result = await response.json();
                 
-                // Reset UI
-                guesses.innerHTML = '';
-                guessesContainer.classList.add('hidden');
-                winMessage.classList.add('hidden');
-                loseMessage.classList.add('hidden');
-                gameControls.classList.remove('hidden');
-                guessesRemaining.textContent = '6';
-                
-                showStatus('New game started with the same video!', 'success');
+                if (result.success) {
+                    // Display new video
+                    if (result.video_data.original_video) {
+                        displayVideo(result.video_data.original_video, gameVideo);
+                        videoInfo.textContent = `Goal by ${result.video_data.player_name}`;
+                    }
+                    
+                    // Reset UI
+                    guesses.innerHTML = '';
+                    guessesContainer.classList.add('hidden');
+                    winMessage.classList.add('hidden');
+                    loseMessage.classList.add('hidden');
+                    gameControls.classList.remove('hidden');
+                    hideReveal();
+                    guessesRemaining.textContent = '6';
+                    
+                    currentGame = result.game_state;
+                    showStatus('New game started!', 'success');
+                } else {
+                    showStatus(`Error: ${result.error}`, 'error');
+                }
             } catch (error) {
                 showStatus(`Failed to start new game: ${error.message}`, 'error');
             }
@@ -581,6 +608,10 @@
             guessesContainer.classList.add('hidden');
             winMessage.classList.add('hidden');
             loseMessage.classList.add('hidden');
+        }
+
+        function hideReveal() {
+            revealSection.classList.add('hidden');
         }
 
         // Initialize
