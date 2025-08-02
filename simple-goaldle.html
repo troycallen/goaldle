@@ -133,6 +133,7 @@
         <div id="videoSection" class="video-section hidden">
             <h2>Blurred Video</h2>
             <video id="blurredVideo" controls></video>
+            <button id="downloadBtn" class="process-btn" style="margin-top: 1rem;">Download Video</button>
         </div>
     </div>
 
@@ -142,6 +143,7 @@
         const status = document.getElementById('status');
         const videoSection = document.getElementById('videoSection');
         const blurredVideo = document.getElementById('blurredVideo');
+        const downloadBtn = document.getElementById('downloadBtn');
 
         let selectedFile = null;
 
@@ -181,6 +183,15 @@
                     const videoUrl = URL.createObjectURL(blob);
                     
                     blurredVideo.src = videoUrl;
+                    
+                    // Setup download functionality
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = videoUrl;
+                        a.download = 'blurred-video.mp4';
+                        a.click();
+                    };
+                    
                     showVideoSection();
                     showStatus(`Video processed successfully! (${result.video_info.frames} frames)`, 'success');
                 } else {

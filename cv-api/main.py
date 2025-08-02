@@ -34,8 +34,14 @@ from collections import defaultdict
 
 app = FastAPI(title="GoalDle CV API", version="1.0")
 
-# CORS - Allow all origins for file:// URLs
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# CORS - Allow all origins including file:// URLs
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=["*"], 
+    allow_methods=["*"], 
+    allow_headers=["*"],
+    allow_credentials=False
+)
 
 class MinimalCV:
     def __init__(self):
@@ -141,7 +147,7 @@ class MinimalCV:
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             
             output_path = temp_path.replace('.mp4', '_blurred.mp4')
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            fourcc = cv2.VideoWriter_fourcc(*'H264')  # Better browser compatibility
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
             
             frame_count = 0
