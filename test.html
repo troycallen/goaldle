@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GoalDle CV Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .upload-area {
+            border: 2px dashed #444;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .video-container {
+            margin: 20px 0;
+        }
+        video {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #666;
+        }
+        .error {
+            color: #ff6b6b;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 GoalDle CV Test</h1>
+    
+    <div class="upload-area">
+        <h3>Upload Goal Video</h3>
+        <input type="file" id="videoInput" accept="video/*">
+        <br><br>
+        <button onclick="processVideo()" id="processBtn">Blur Players</button>
+    </div>
+    
+    <div id="result" class="video-container"></div>
+    <div id="error" class="error"></div>
+
+    <script>
+        async function processVideo() {
+            const fileInput = document.getElementById('videoInput');
+            const processBtn = document.getElementById('processBtn');
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            if (!fileInput.files[0]) {
+                errorDiv.textContent = 'Please select a video file';
+                return;
+            }
+            
+            processBtn.disabled = true;
+            processBtn.textContent = 'Processing...';
+            errorDiv.textContent = '';
+            resultDiv.innerHTML = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch('http://localhost:8000/process-video', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Convert base64 to video
+                    const byteCharacters = atob(result.blurred_video);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'video/mp4' });
+                    const videoUrl = URL.createObjectURL(blob);
+                    
+                    resultDiv.innerHTML = `
+                        <h3>Blurred Video</h3>
+                        <video controls>
+                            <source src="${videoUrl}" type="video/mp4">
+                        </video>
+                        <p>Video info: ${result.video_info.fps}fps, ${result.video_info.width}x${result.video_info.height}, ${result.video_info.frames} frames</p>
+                    `;
+                } else {
+                    errorDiv.textContent = result.error || 'Processing failed';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Failed to process video: ' + err.message;
+            } finally {
+                processBtn.disabled = false;
+                processBtn.textContent = 'Blur Players';
+            }
+        }
+    </script>
+</body>
+</html> 
