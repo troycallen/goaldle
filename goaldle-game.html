@@ -50,7 +50,7 @@
         }
         
         h1 {
-            font-size: 1.8rem;
+            font-size: 2.0rem;
             margin: 0;
             font-weight: 700;
             color: #e2e8f0;
@@ -67,7 +67,7 @@
             color: #a0aec0;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             cursor: pointer;
         }
         
@@ -81,17 +81,20 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            margin: 20px 0 2rem 0;
+            margin: 0px 0 2rem 0;
         }
         
         .video-section {
-            padding: 25px 25px 0px 25px;
+            padding: 5px 25px 0px 25px;
             margin-bottom: 0px;
         }
         
         .game-section {
             padding: 0px 25px 25px 25px;
             margin-bottom: 0px;
+            margin-top: -40px;
+            position: relative;
+            min-height: 600px;
         }
         
         .section-title {
@@ -178,6 +181,30 @@
             display: block;
             background: #000;
             object-fit: contain;
+        }
+        
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .video-controls-left {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        
+        .video-controls-right {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            justify-content: flex-end;
         }
         
         #gameControls {
@@ -285,6 +312,85 @@
         .lose-message {
             background: rgba(220, 38, 38, 0.3);
             border: 2px solid #dc2626;
+        }
+        
+        .game-recap {
+            background: #2d3748;
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+        
+        .game-recap.win {
+            background: #1a4038;
+            border-color: #059669;
+        }
+        
+        .game-recap.lose {
+            background: #3c1919;
+            border-color: #dc2626;
+        }
+        
+        .recap-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            text-align: center;
+            color: #e2e8f0;
+        }
+        
+        .recap-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .recap-stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: #1a202c;
+            border-radius: 6px;
+        }
+        
+        .recap-stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3182ce;
+        }
+        
+        .recap-stat-label {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            margin-top: 0.2rem;
+        }
+        
+        .recap-answer {
+            text-align: center;
+            padding: 0.75rem;
+            background: #1a202c;
+            border-radius: 6px;
+        }
+        
+        .recap-answer-label {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            margin-bottom: 0.3rem;
+        }
+        
+        .recap-answer-value {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #e2e8f0;
         }
         
         .player-suggestion {
@@ -397,23 +503,28 @@
             <div class="video-section">
                 <div id="videoStatus" class="status hidden"></div>
                 
-                <div id="videoDisplay" style="margin-top: 0.5rem; position: relative;">
+                <div id="videoDisplay" style="margin-top: 0.5rem;">
                     <video id="gameVideo" controls></video>
-                    <div class="dropdown" style="position: absolute; top: -49px; left: 5px;">
-                        <button id="dailyChallengeBtn" class="btn">📅</button>
-                        <div id="dailyDropdown" class="dropdown-content">
-                            <div class="dropdown-item current" data-goal-id="1" data-date="08/02/2025">08/02/2025</div>
-                            <div class="dropdown-item" data-goal-id="2" data-date="08/01/2025">08/01/2025</div>
-                            <div class="dropdown-item" data-goal-id="3" data-date="07/31/2025">07/31/2025</div>
-                            <div class="dropdown-item" data-goal-id="4" data-date="07/30/2025">07/30/2025</div>
-                            <div class="dropdown-item" data-goal-id="5" data-date="07/29/2025">07/29/2025</div>
-                            <div class="dropdown-item" data-goal-id="6" data-date="07/28/2025">07/28/2025</div>
-                            <div class="dropdown-item" data-goal-id="1" data-date="07/27/2025">07/27/2025</div>
+                    <div class="video-controls">
+                        <div class="video-controls-left">
+                            <div class="dropdown">
+                                <button id="dailyChallengeBtn" class="btn">📅</button>
+                                <div id="dailyDropdown" class="dropdown-content">
+                                    <div class="dropdown-item current" data-goal-id="1" data-date="08/02/2025">08/02/2025</div>
+                                    <div class="dropdown-item" data-goal-id="2" data-date="08/01/2025">08/01/2025</div>
+                                    <div class="dropdown-item" data-goal-id="3" data-date="07/31/2025">07/31/2025</div>
+                                    <div class="dropdown-item" data-goal-id="4" data-date="07/30/2025">07/30/2025</div>
+                                    <div class="dropdown-item" data-goal-id="5" data-date="07/29/2025">07/29/2025</div>
+                                    <div class="dropdown-item" data-goal-id="6" data-date="07/28/2025">07/28/2025</div>
+                                    <div class="dropdown-item" data-goal-id="1" data-date="07/27/2025">07/27/2025</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-controls-right">
+                            <button id="giveUpBtn" class="btn give-up">❌</button>
+                            <button id="restartBtn" class="btn">🔄</button>
                         </div>
                     </div>
-                    <button id="giveUpBtn" class="btn give-up" style="position: absolute; top: -49px; right: 55px;">❌</button>
-                    <button id="restartBtn" class="btn" style="position: absolute; top: -49px; right: 5px;">🔄</button>
-                    <div id="videoInfo" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;"></div>
                 </div>
                 
                 
@@ -434,6 +545,28 @@
                 
                 <div id="loseMessage" class="lose-message hidden">
                     Game Over! The answer was: <span id="correctAnswer"></span>
+                </div>
+                
+                <div id="gameRecap" class="game-recap hidden">
+                    <div class="recap-title">Game Summary</div>
+                    <div class="recap-stats">
+                        <div class="recap-stat">
+                            <div class="recap-stat-value" id="recapGuesses">0</div>
+                            <div class="recap-stat-label">Guesses Used</div>
+                        </div>
+                        <div class="recap-stat">
+                            <div class="recap-stat-value" id="recapResult">❌</div>
+                            <div class="recap-stat-label">Result</div>
+                        </div>
+                        <div class="recap-stat">
+                            <div class="recap-stat-value" id="recapTime">--</div>
+                            <div class="recap-stat-label">Time</div>
+                        </div>
+                    </div>
+                    <div class="recap-answer">
+                        <div class="recap-answer-label">Correct Answer</div>
+                        <div class="recap-answer-value" id="recapAnswerPlayer">Unknown Player</div>
+                    </div>
                 </div>
                 
                 <div id="guessesContainer" class="guesses-container">
@@ -506,7 +639,6 @@
         const videoStatus = document.getElementById('videoStatus');
         const videoDisplay = document.getElementById('videoDisplay');
         const gameVideo = document.getElementById('gameVideo');
-        const videoInfo = document.getElementById('videoInfo');
         
         const gameControls = document.getElementById('gameControls');
         const playerGuess = document.getElementById('playerGuess');
@@ -520,10 +652,16 @@
         const winMessage = document.getElementById('winMessage');
         const loseMessage = document.getElementById('loseMessage');
         const correctAnswer = document.getElementById('correctAnswer');
+        const gameRecap = document.getElementById('gameRecap');
+        const recapGuesses = document.getElementById('recapGuesses');
+        const recapResult = document.getElementById('recapResult');
+        const recapTime = document.getElementById('recapTime');
+        const recapAnswerPlayer = document.getElementById('recapAnswerPlayer');
 
         let availablePlayers = [];
         let currentGame = null;
         let currentGuessRow = 0;
+        let gameStartTime = null;
 
         // Load available players
         async function loadPlayers() {
@@ -554,9 +692,6 @@
                     // Display video
                     if (result.video_data.original_video) {
                         displayVideo(result.video_data.original_video, gameVideo);
-                        
-                        // Hide video info during game
-                        videoInfo.textContent = "";
                     }
                     
                     // Reset all game state
@@ -564,6 +699,7 @@
                     
                     // Start game
                     currentGame = result.game_state;
+                    gameStartTime = Date.now();
                     showGame();
                     hideStatus();
                 } else {
@@ -590,6 +726,9 @@
             
             winMessage.classList.add('hidden');
             loseMessage.classList.add('hidden');
+            gameRecap.classList.add('hidden');
+            gameRecap.classList.remove('win', 'lose');
+            guessesContainer.classList.remove('hidden');
             gameControls.classList.remove('hidden');
             playerGuess.value = '';
             suggestions.classList.add('hidden');
@@ -655,16 +794,22 @@
                     body: JSON.stringify({ player_name: player })
                 });
 
-                const result = await response.json();
-                
                 if (response.ok) {
+                    const result = await response.json();
                     displayGuess(result.guess_result);
                     updateGameState(result);
                     playerGuess.value = '';
                     suggestions.classList.add('hidden');
                 } else {
-                    console.error('Server error response:', result);
-                    showStatus(`Error: ${result.detail || result.error || 'Unknown server error'}`, 'error');
+                    const errorText = await response.text();
+                    console.error('Server error response:', errorText);
+                    console.error('Response status:', response.status);
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        showStatus(`Error: ${errorJson.detail || errorJson.error || 'Unknown server error'}`, 'error');
+                    } catch {
+                        showStatus(`Server error: ${response.status}`, 'error');
+                    }
                 }
             } catch (error) {
                 showStatus(`Failed to submit guess: ${error.message}`, 'error');
@@ -689,15 +834,46 @@
 
         function updateGameState(result) {            
             if (result.is_winner) {
-                winMessage.classList.remove('hidden');
                 gameControls.classList.add('hidden');
+                showGameRecap(result, true);
                 showVideoReveal();
             } else if (result.game_over) {
-                correctAnswer.textContent = result.target_player.name;
-                loseMessage.classList.remove('hidden');
                 gameControls.classList.add('hidden');
+                showGameRecap(result, false);
                 showVideoReveal();
             }
+        }
+        
+        function showGameRecap(result, isWinner) {
+            // Hide old messages and guessing area, show recap
+            winMessage.classList.add('hidden');
+            loseMessage.classList.add('hidden');
+            guessesContainer.classList.add('hidden');
+            gameRecap.classList.remove('hidden');
+            
+            // Add win/lose styling
+            gameRecap.classList.remove('win', 'lose');
+            gameRecap.classList.add(isWinner ? 'win' : 'lose');
+            
+            // Calculate game time
+            const gameTime = gameStartTime ? Math.floor((Date.now() - gameStartTime) / 1000) : 0;
+            const minutes = Math.floor(gameTime / 60);
+            const seconds = gameTime % 60;
+            const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update recap data
+            recapGuesses.textContent = result.total_guesses || currentGuessRow;
+            recapResult.textContent = isWinner ? '✅' : '❌';
+            recapTime.textContent = timeStr;
+            
+            // Get the correct answer from the right place
+            let playerName = 'Unknown';
+            if (result.target_player && result.target_player.name) {
+                playerName = result.target_player.name;
+            } else if (currentGame && currentGame.target_player && currentGame.target_player.name) {
+                playerName = currentGame.target_player.name;
+            }
+            recapAnswerPlayer.textContent = playerName;
         }
 
         // Show video reveal after game ends - replace the current video
@@ -709,7 +885,6 @@
                 if (result.success && result.reveal_data.videos.original_video) {
                     // Replace the current video with the original
                     displayVideo(result.reveal_data.videos.original_video, gameVideo);
-                    videoInfo.textContent = `Original Goal by ${result.reveal_data.goal_info.player_name}`;
                 }
             } catch (error) {
                 console.error('Failed to load video reveal:', error);
@@ -729,9 +904,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    correctAnswer.textContent = result.reveal_data.goal_info.player_name;
-                    loseMessage.classList.remove('hidden');
                     gameControls.classList.add('hidden');
+                    
+                    // Show recap for give up scenario
+                    const giveUpResult = {
+                        total_guesses: currentGuessRow,
+                        target_player: { name: result.reveal_data.goal_info.player_name },
+                        game_over: true,
+                        is_winner: false
+                    };
+                    showGameRecap(giveUpResult, false);
                 }
             } catch (error) {
                 console.error('Failed to give up:', error);
