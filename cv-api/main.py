@@ -34,8 +34,8 @@ from collections import defaultdict
 
 app = FastAPI(title="GoalDle CV API", version="1.0")
 
-# CORS
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["*"], allow_headers=["*"])
+# CORS - Allow all origins for file:// URLs
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 class MinimalCV:
     def __init__(self):
