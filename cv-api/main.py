@@ -1,4 +1,4 @@
-# Goaldle CV API
+# Goaldle CV API - Hybrid Approach (Best of Both)
 import subprocess
 import sys
 import os
@@ -11,12 +11,13 @@ def install_deps():
         import mediapipe
         import torch
         import fastapi
+        import scipy
         print("✅ All dependencies already installed")
     except ImportError:
         print("📦 Installing dependencies...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", 
                              "opencv-python", "ultralytics", "mediapipe", 
-                             "torch", "fastapi", "uvicorn", "python-multipart"])
+                             "torch", "fastapi", "uvicorn", "python-multipart", "scipy"])
 
 install_deps()
 
@@ -31,21 +32,81 @@ import tempfile
 from datetime import datetime
 from ultralytics import YOLO
 from collections import defaultdict
+from scipy.optimize import linear_sum_assignment
 
 # create app and add cors
 app = FastAPI(title="GoalDle CV API", version="1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=False)
 
-class GoaldleCV:
+class HybridGoaldleCV:
     def __init__(self):
-        self.yolo = YOLO('yolov8n-seg.pt')  
-        self.tracks = defaultdict(lambda: {'bbox': None, 'mask': None, 'centroid': None, 'frames': 0})
+        # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
+        self.yolo = YOLO('yolov8m-seg.pt')  
+        self.tracks = {}
         self.next_id = 0
-        self.max_disappeared = 15  
+        self.max_disappeared = 30  # Your good parameter
+        self.min_confidence = 0.3  # Your parameter - keeps more detections
+        self.max_distance = 150    # Your parameter - more lenient matching
+        self.min_iou = 0.1        # Your parameter
+        
+    def get_simple_features(self, bbox, mask, frame):
+        """Simplified feature extraction - faster than full histogram"""
+        x1, y1, x2, y2 = bbox
+        
+        # Basic features
+        centroid = ((x1 + x2) // 2, (y1 + y2) // 2)
+        area = (x2 - x1) * (y2 - y1)
+        aspect_ratio = (x2 - x1) / max(y2 - y1, 1)
+        
+        # Simple color feature - just average color in bbox
+        roi = frame[y1:y2, x1:x2]
+        if roi.size > 0:
+            avg_color = np.mean(roi.reshape(-1, 3), axis=0)
+        else:
+            avg_color = np.array([0, 0, 0])
+        
+        return {
+            'centroid': centroid,
+            'area': area,
+            'aspect_ratio': aspect_ratio,
+            'avg_color': avg_color,
+            'bbox': bbox
+        }
+    
+    def calculate_similarity(self, det_features, track_features):
+        """Lightweight similarity calculation"""
+        # Distance check first (early exit)
+        cent_dist = np.sqrt((det_features['centroid'][0] - track_features['centroid'][0])**2 + 
+                           (det_features['centroid'][1] - track_features['centroid'][1])**2)
+        
+        if cent_dist > self.max_distance:
+            return 0  # Too far apart
+        
+        # IoU check
+        iou = self.iou(det_features['bbox'], track_features['bbox'])
+        if iou < self.min_iou:
+            return 0  # Not enough overlap
+        
+        # Area similarity
+        area_ratio = min(det_features['area'], track_features['area']) / max(det_features['area'], track_features['area'])
+        
+        # Color similarity (simple Euclidean distance)
+        color_dist = np.linalg.norm(det_features['avg_color'] - track_features['avg_color'])
+        color_sim = max(0, 1 - color_dist / 100)  # Normalize to 0-1
+        
+        # Combined score
+        similarity = (
+            (1 / (1 + cent_dist/50)) * 0.5 +  # Distance (most important)
+            iou * 0.3 +                        # Overlap
+            area_ratio * 0.1 +                 # Size consistency
+            color_sim * 0.1                    # Color consistency
+        )
+        
+        return similarity
     
     def detect_and_track(self, frame):
-        # YOLOv8 segmentation
-        results = self.yolo(frame, classes=[0], verbose=False)  # person class
+        # YOLOv8 detection with your parameters
+        results = self.yolo(frame, classes=[0], verbose=False, conf=self.min_confidence)
         detections = []
         
         for result in results:
@@ -53,53 +114,117 @@ class GoaldleCV:
                 for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
                     x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
                     conf = float(box.conf[0].cpu().numpy())
-                    if conf > 0.3:  # Lower threshold to catch more players
-                        # Get segmentation mask
-                        mask_data = mask.data[0].cpu().numpy()  # Shape: (H, W)
-                        detections.append((x1, y1, x2, y2, conf, mask_data))
-        
-        # Improved tracking with centroids
-        current_tracks = []
-        for det in detections:
-            x1, y1, x2, y2, conf, mask = det
-            centroid = ((x1 + x2) // 2, (y1 + y2) // 2)
-            
-            best_match = None
-            best_distance = float('inf')
-            
-            for track_id, track in self.tracks.items():
-                if track['centroid'] and track['frames'] < self.max_disappeared:
-                    # Use both centroid distance and IOU
-                    dist = ((centroid[0] - track['centroid'][0])**2 + (centroid[1] - track['centroid'][1])**2)**0.5
-                    iou = self.iou((x1, y1, x2, y2), track['bbox']) if track['bbox'] else 0
                     
-                    # Combined score: prefer close centroids with decent IOU
-                    if dist < 100 and iou > 0.2 and dist < best_distance:
-                        best_distance = dist
-                        best_match = track_id
-            
-            if best_match:
-                self.tracks[best_match]['bbox'] = (x1, y1, x2, y2)
-                self.tracks[best_match]['mask'] = mask
-                self.tracks[best_match]['centroid'] = centroid
-                self.tracks[best_match]['frames'] = 0
-                current_tracks.append((x1, y1, x2, y2, best_match, mask))
-            else:
-                track_id = self.next_id
-                self.next_id += 1
-                self.tracks[track_id] = {'bbox': (x1, y1, x2, y2), 'mask': mask, 'centroid': centroid, 'frames': 0}
-                current_tracks.append((x1, y1, x2, y2, track_id, mask))
+                    # Basic size filtering
+                    bbox_area = (x2 - x1) * (y2 - y1)
+                    if bbox_area > 500:  # Minimum reasonable size
+                        mask_data = mask.data[0].cpu().numpy()
+                        features = self.get_simple_features((x1, y1, x2, y2), mask_data, frame)
+                        detections.append((x1, y1, x2, y2, conf, mask_data, features))
         
-        # Clean stale tracks - but keep them longer to reduce blinking
-        for track_id in list(self.tracks.keys()):
-            if track_id not in [t[4] for t in current_tracks]:  # Not in current detections
-                self.tracks[track_id]['frames'] += 1
-                if self.tracks[track_id]['frames'] > self.max_disappeared:
-                    del self.tracks[track_id]
+        # Use Hungarian algorithm for assignment (prevents blinking)
+        if len(detections) > 0 and len(self.tracks) > 0:
+            current_tracks = self.assign_with_hungarian(detections)
+        else:
+            # Initialize tracks for first frame or when no existing tracks
+            current_tracks = self.initialize_tracks(detections)
+        
+        # Clean up old tracks
+        self.cleanup_tracks(current_tracks)
         
         return current_tracks
     
+    def assign_with_hungarian(self, detections):
+        """Hungarian algorithm assignment"""
+        track_ids = [tid for tid, track in self.tracks.items() if track['frames'] < self.max_disappeared]
+        
+        if not track_ids:
+            return self.initialize_tracks(detections)
+        
+        # Build similarity matrix
+        similarity_matrix = np.zeros((len(detections), len(track_ids)))
+        
+        for i, det in enumerate(detections):
+            features = det[6]
+            for j, track_id in enumerate(track_ids):
+                similarity = self.calculate_similarity(features, self.tracks[track_id]['features'])
+                similarity_matrix[i, j] = similarity
+        
+        # Hungarian assignment (maximize similarity)
+        if similarity_matrix.size > 0:
+            row_indices, col_indices = linear_sum_assignment(-similarity_matrix)
+        else:
+            row_indices, col_indices = [], []
+        
+        # Process assignments
+        current_tracks = []
+        assigned_detections = set()
+        assigned_tracks = set()
+        
+        for row, col in zip(row_indices, col_indices):
+            if similarity_matrix[row, col] > 0.2:  # Minimum threshold
+                det = detections[row]
+                track_id = track_ids[col]
+                x1, y1, x2, y2, conf, mask, features = det
+                
+                # Update track
+                self.tracks[track_id]['features'] = features
+                self.tracks[track_id]['frames'] = 0
+                
+                current_tracks.append((x1, y1, x2, y2, track_id, mask))
+                assigned_detections.add(row)
+                assigned_tracks.add(track_id)
+        
+        # Create new tracks for unassigned detections
+        for i, det in enumerate(detections):
+            if i not in assigned_detections:
+                x1, y1, x2, y2, conf, mask, features = det
+                track_id = self.next_id
+                self.next_id += 1
+                
+                self.tracks[track_id] = {
+                    'features': features,
+                    'frames': 0
+                }
+                
+                current_tracks.append((x1, y1, x2, y2, track_id, mask))
+        
+        # Update frames for unassigned tracks
+        for track_id in track_ids:
+            if track_id not in assigned_tracks:
+                self.tracks[track_id]['frames'] += 1
+        
+        return current_tracks
+    
+    def initialize_tracks(self, detections):
+        """Initialize tracks for first frame"""
+        current_tracks = []
+        for det in detections:
+            x1, y1, x2, y2, conf, mask, features = det
+            track_id = self.next_id
+            self.next_id += 1
+            
+            self.tracks[track_id] = {
+                'features': features,
+                'frames': 0
+            }
+            
+            current_tracks.append((x1, y1, x2, y2, track_id, mask))
+        
+        return current_tracks
+    
+    def cleanup_tracks(self, current_tracks):
+        """Remove old tracks"""
+        tracks_to_remove = []
+        for track_id in list(self.tracks.keys()):
+            if self.tracks[track_id]['frames'] > self.max_disappeared:
+                tracks_to_remove.append(track_id)
+        
+        for track_id in tracks_to_remove:
+            del self.tracks[track_id]
+    
     def iou(self, bbox1, bbox2):
+        """Your IoU function"""
         x1_1, y1_1, x2_1, y2_1 = bbox1
         x1_2, y1_2, x2_2, y2_2 = bbox2
         
@@ -119,6 +244,7 @@ class GoaldleCV:
         return intersection / union if union > 0 else 0.0
     
     def blur_players(self, frame, tracks):
+        """Your improved mask processing"""
         result = frame.copy()
         h, w = frame.shape[:2]
         
@@ -129,22 +255,16 @@ class GoaldleCV:
             else:
                 mask_resized = mask
             
-            # Convert to binary mask with better processing
-            binary_mask = (mask_resized > 0.3).astype(np.uint8)  # Lower threshold for better coverage
+            # Your tight mask processing
+            binary_mask = (mask_resized > 0.5).astype(np.uint8)  # Higher threshold
             
-            # Enhanced morphological operations to fill gaps and smooth
-            kernel_small = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-            kernel_large = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            # Minimal morphological operations
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
             
-            # Fill small holes and gaps
-            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel_small)
-            # Dilate slightly to ensure full body coverage
-            binary_mask = cv2.dilate(binary_mask, kernel_small, iterations=2)
-            # Fill larger holes
-            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel_large)
-            # Smooth the edges
-            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (5, 5), 0)
-            binary_mask = (binary_mask > 0.3).astype(np.uint8)
+            # Light smoothing
+            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (3, 3), 0)
+            binary_mask = (binary_mask > 0.5).astype(np.uint8)
             
             # Apply black silhouette
             result[binary_mask == 1] = [0, 0, 0]
@@ -167,7 +287,7 @@ class GoaldleCV:
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             
             output_path = temp_path.replace('.mp4', '_blurred.mp4')
-            fourcc = cv2.VideoWriter_fourcc(*'H264')  # Better browser compatibility
+            fourcc = cv2.VideoWriter_fourcc(*'H264')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
             
             frame_count = 0
@@ -183,7 +303,8 @@ class GoaldleCV:
                 
                 frame_count += 1
                 if frame_count % 30 == 0:
-                    print(f"Processed {frame_count} frames")
+                    active_tracks = len([t for t in self.tracks.values() if t['frames'] < 5])
+                    print(f"Processed {frame_count} frames - Active tracks: {active_tracks}")
             
             cap.release()
             out.release()
@@ -205,11 +326,11 @@ class GoaldleCV:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-cv = GoaldleCV()
+cv = HybridGoaldleCV()
 
 @app.get("/")
 async def root():
-    return {"message": "GoalDle CV API", "status": "ready"}
+    return {"message": "GoalDle CV API - Hybrid Approach", "status": "ready"}
 
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
@@ -220,7 +341,14 @@ async def process_video(file: UploadFile = File(...)):
     result = cv.process_video(contents)
     return JSONResponse(content=result)
 
+@app.post("/reset-tracking")
+async def reset_tracking():
+    """Reset tracking state for new video"""
+    global cv
+    cv = HybridGoaldleCV()
+    return {"message": "Tracking reset successfully"}
+
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting GoalDle CV API...")
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    print("🚀 Starting GoalDle CV API - Hybrid Approach...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
