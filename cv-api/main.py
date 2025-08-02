@@ -41,7 +41,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 class HybridGoaldleCV:
     def __init__(self):
         # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
-        self.yolo = YOLO('yolov8m-seg.pt')  
+        self.yolo = YOLO('yolov8n-seg.pt')  # Use smaller model to avoid GitHub file size limits  
         self.tracks = {}
         self.next_id = 0
         self.max_disappeared = 30  # Your good parameter
