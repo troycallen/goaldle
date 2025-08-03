@@ -1,32 +1,38 @@
 [
   {
     "id": "1",
-    "video": "cv-api/goals/drogba.mp4",
+    "original_video": "cv-api/goals/drogba.mp4",
+    "blurred_video": "cv-api/goals/blurred/drogba_blurred.mp4",
     "scorer": "Didier Drogba"
   },
   {
     "id": "2",
-    "video": "cv-api/goals/messi.mp4", 
+    "original_video": "cv-api/goals/messi.mp4",
+    "blurred_video": "cv-api/goals/blurred/messi_blurred.mp4",
     "scorer": "Lionel Messi"
   },
-  { 
+  {
     "id": "3",
-    "video": "cv-api/goals/salah.mp4",
+    "original_video": "cv-api/goals/salah.mp4",
+    "blurred_video": "cv-api/goals/blurred/salah_blurred.mp4",
     "scorer": "Mohamed Salah"
   },
   {
     "id": "4",
-    "video": "cv-api/goals/son.mp4",
+    "original_video": "cv-api/goals/son.mp4",
+    "blurred_video": "cv-api/goals/blurred/son_blurred.mp4",
     "scorer": "Son Heung-min"
   },
   {
     "id": "5",
-    "video": "cv-api/goals/tatsuya_ito.mp4",
+    "original_video": "cv-api/goals/tatsuya_ito.mp4",
+    "blurred_video": "cv-api/goals/blurred/tatsuya_ito_blurred.mp4",
     "scorer": "Tatsuya Ito"
   },
   {
     "id": "6",
-    "video": "cv-api/goals/yamal.mp4",
+    "original_video": "cv-api/goals/yamal.mp4",
+    "blurred_video": "cv-api/goals/blurred/yamal_blurred.mp4",
     "scorer": "Lamine Yamal"
   }
-] 
+]

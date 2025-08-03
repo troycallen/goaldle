@@ -43,3 +43,6 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Computer vision files
+cv-api/goals/blurred/

@@ -229,11 +229,11 @@ class GoaldleGame:
         return [player["name"] for player in self.players]
     
     def get_current_video(self) -> Optional[Dict[str, Any]]:
-        """Get the current goal's video information"""
+        """Get the current goal's blurred video for gameplay"""
         if not self.current_goal:
             return None
         
-        return self.video_manager.get_video_pair(self.current_goal)
+        return self.video_manager.get_game_video(self.current_goal)
     
     def get_video_reveal(self) -> Optional[Dict[str, Any]]:
         """Get both blurred and original videos for reveal"""
