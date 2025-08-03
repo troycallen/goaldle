@@ -1,25 +1,48 @@
-# GoalDle CV API
+# GoalDle
 
-Blurs players in soccer videos using computer vision.
+A soccer goal guessing game where players watch blurred videos of famous goals and try to identify the scorer.
+
+## Overview
+
+GoalDle combines computer vision with an interactive web game. Players are shown videos where the goal scorer appears as a black silhouette, and they must guess who scored the goal. The game includes famous goals from players like Messi, Drogba, Salah, Son Heung-min, and others.
+
+## Components
+
+- **CV API**: FastAPI backend with computer vision processing (`cv-api/`)
+- **Web Game**: HTML/CSS/JS frontend (`goaldle-game.html`)
+- **Goal Database**: Pre-processed videos with original and blurred versions
 
 ## Setup
 
 ```bash
+cd cv-api
 python main.py
 ```
 
-Dependencies install automatically on first run.
+Dependencies install automatically on first run. Then open `goaldle-game.html` in your browser.
 
-## Usage
+## API Endpoints
 
-POST video file to `http://localhost:8000/process-video`
+### Game Endpoints
+- `POST /game/new` - Start a new game
+- `POST /game/guess` - Make a player guess
+- `GET /game/state` - Get current game state
+- `GET /game/players` - Get available players for autocomplete
+- `GET /game/current-video` - Get blurred video for current game
 
-Returns base64 encoded video with players as black silhouettes.
+### Video Processing
+- `POST /process-video` - Process and blur a new video
+- `POST /reset-tracking` - Reset tracking state
 
-## What it does
+## How It Works
 
-- Detects players using YOLOv8
-- Tracks them across frames  
-- Applies black silhouette effect to player regions
+1. **Player Detection**: Uses YOLOv8 to detect players in soccer videos
+2. **Player Tracking**: Hungarian algorithm assigns consistent IDs across frames
+3. **Silhouette Effect**: Applies black silhouette masks to tracked players
+4. **Game Logic**: Manages game state, scoring, and player database
 
-Built for the GoalDle game.
+## Technology Stack
+
+- **Backend**: FastAPI, OpenCV, PyTorch, YOLOv8
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Computer Vision**: YOLO object detection, Hungarian algorithm tracking
