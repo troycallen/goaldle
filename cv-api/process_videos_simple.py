@@ -62,7 +62,7 @@ def main():
     
     for goal in goals:
         goal_id = goal['id']
-        original_path = goal['video']
+        original_path = goal['original_video']
         scorer = goal['scorer']
         
         # Fix the path - remove cv-api/ prefix since we're running from cv-api directory

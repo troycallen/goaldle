@@ -341,6 +341,7 @@ class GuessRequest(BaseModel):
 async def root():
     return {"message": "GoalDle CV API - Hybrid Approach", "status": "ready"}
 
+
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
     if not file.content_type.startswith("video/"):
@@ -479,4 +480,4 @@ async def integrate_video_with_game(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting GoalDle CV API - Hybrid Approach...")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
