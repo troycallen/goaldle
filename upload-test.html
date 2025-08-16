@@ -3,118 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Upload Test - Goaldle CV</title>
+    <title>Goaldle Video Upload Test</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            background: #1a202c;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        .header {
+            background: #2d3748;
+            border-bottom: 3px solid #4a5568;
+            padding: 20px;
+            margin: -20px -20px 30px -20px;
+            border-radius: 0 0 10px 10px;
         }
+        
         h1 {
-            color: #333;
+            font-size: 2.0rem;
+            margin: 0;
+            font-weight: 700;
+            color: #e2e8f0;
             text-align: center;
         }
+        
+        .upload-section {
+            background: #2d3748;
+            border: 2px solid #4a5568;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
         .upload-area {
-            border: 2px dashed #ddd;
+            border: 2px dashed #4a5568;
             border-radius: 10px;
             padding: 40px;
             text-align: center;
             margin: 20px 0;
-            background-color: #fafafa;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
+        
+        .upload-area:hover {
+            border-color: #3182ce;
+            background: rgba(49, 130, 206, 0.1);
+        }
+        
         .upload-area.dragover {
-            border-color: #007bff;
-            background-color: #f0f8ff;
+            border-color: #3182ce;
+            background: rgba(49, 130, 206, 0.2);
         }
-        input[type="file"] {
-            margin: 20px 0;
+        
+        .upload-text {
+            color: #a0aec0;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
         }
-        button {
-            background-color: #007bff;
+        
+        .btn {
+            background: #3182ce;
             color: white;
-            border: none;
+            border: 2px solid #2c5282;
             padding: 12px 24px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
-        button:hover {
-            background-color: #0056b3;
+        
+        .btn:hover:not(:disabled) {
+            background: #2c5282;
         }
-        button:disabled {
-            background-color: #ccc;
+        
+        .btn:disabled {
+            background: #4a5568;
+            border-color: #4a5568;
             cursor: not-allowed;
+            opacity: 0.6;
         }
+        
+        .file-info {
+            color: #e2e8f0;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
         .progress {
             margin: 20px 0;
             display: none;
         }
+        
+        .progress-text {
+            color: #a0aec0;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
         .progress-bar {
             width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
+            height: 8px;
+            background: #4a5568;
+            border-radius: 4px;
             overflow: hidden;
         }
+        
         .progress-fill {
             height: 100%;
-            background-color: #007bff;
+            background: #3182ce;
             width: 0%;
             transition: width 0.3s ease;
         }
+        
         .result {
             margin-top: 20px;
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             display: none;
         }
+        
         .result.success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background: rgba(5, 150, 105, 0.3);
+            border: 2px solid #059669;
         }
+        
         .result.error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background: rgba(220, 38, 38, 0.3);
+            border: 2px solid #dc2626;
         }
+        
         video {
             width: 100%;
-            max-width: 600px;
-            border-radius: 5px;
-            margin-top: 10px;
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+            background: #000;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            background: #059669;
+            border-color: #047857;
+        }
+        
+        .download-btn:hover {
+            background: #047857;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Goaldle CV - Video Upload Test</h1>
-        <p>Upload a soccer video to test the player blurring functionality.</p>
-        
-        <div class="upload-area" id="uploadArea">
-            <p>📹 Drop your video file here or click to select</p>
-            <input type="file" id="videoFile" accept="video/*" style="display: none;">
-            <button type="button" onclick="document.getElementById('videoFile').click()">
-                Choose Video File
-            </button>
+        <div class="header">
+            <h1>⚽ Goaldle Video Upload Test ⚽</h1>
         </div>
         
-        <div style="text-align: center;">
-            <button id="uploadBtn" onclick="uploadVideo()" disabled>
-                🚀 Process Video
-            </button>
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-text">📹 Drop your video file here or click to select</div>
+                <input type="file" id="videoFile" accept="video/*" style="display: none;">
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="uploadBtn" class="btn" onclick="uploadVideo()" disabled>
+                    🚀 Process Video
+                </button>
+            </div>
         </div>
         
         <div class="progress" id="progress">
-            <p>Processing video... This may take a few minutes.</p>
+            <div class="progress-text">Processing video... This may take a few minutes.</div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -153,6 +228,7 @@
             }
         });
 
+        // Single click handler for upload area
         uploadArea.addEventListener('click', () => {
             videoFile.click();
         });
@@ -163,7 +239,17 @@
             const file = videoFile.files[0];
             if (file) {
                 uploadBtn.disabled = false;
-                uploadArea.innerHTML = `<p>✅ Selected: ${file.name}</p><p>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>`;
+                
+                // Update the upload area to show selected file
+                const uploadText = uploadArea.querySelector('.upload-text');
+                const fileInfo = document.getElementById('fileInfo');
+                
+                uploadText.innerHTML = '✅ File Selected';
+                fileInfo.innerHTML = `<strong>${file.name}</strong><br>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                fileInfo.style.display = 'block';
+                
+                uploadArea.style.borderColor = '#059669';
+                uploadArea.style.background = 'rgba(5, 150, 105, 0.1)';
             }
         }
 
@@ -210,7 +296,7 @@
                         </video>
                         <br><br>
                         <a href="data:video/mp4;base64,${data.blurred_video}" download="blurred_video.mp4">
-                            <button>📥 Download Blurred Video</button>
+                            <button class="btn download-btn">📥 Download Blurred Video</button>
                         </a>
                     `;
                 } else {
