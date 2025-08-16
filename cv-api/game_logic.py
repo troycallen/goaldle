@@ -22,22 +22,158 @@ class GoaldleGame:
         
         # Team to league mapping for partial matches
         self.team_leagues = {
+            # Premier League
             "Chelsea": "Premier League",
             "Liverpool": "Premier League", 
             "Tottenham": "Premier League",
+            "Manchester City": "Premier League",
+            "Manchester United": "Premier League",
+            "Arsenal": "Premier League",
+            "West Ham": "Premier League",
+            "Leicester": "Premier League",
+            "Everton": "Premier League",
+            "Aston Villa": "Premier League",
+            "Crystal Palace": "Premier League",
+            "Newcastle": "Premier League",
+            "Southampton": "Premier League",
+            "Watford": "Premier League",
+            "Brighton": "Premier League",
+            "Fulham": "Premier League",
+            "Brentford": "Premier League",
+            "Wolves": "Premier League",
+            "Southampton": "Premier League",
+            "West Brom": "Premier League",
+            "Norwich": "Premier League",
+            
+            # La Liga
             "Barcelona": "La Liga",
+            "Real Madrid": "La Liga",
+            "Atletico Madrid": "La Liga",
+            
+            # Bundesliga
+            "Bayern Munich": "Bundesliga",
+            "Borussia Dortmund": "Bundesliga",
+            "Bayer Leverkusen": "Bundesliga",
+            "Eintracht Frankfurt": "Bundesliga",
+            
+            # Serie A
+            "AC Milan": "Serie A",
+            "Inter Milan": "Serie A",
+            "Juventus": "Serie A",
+            "Napoli": "Serie A",
+            "AS Roma": "Serie A",
+            
+            # Ligue 1
+            "PSG": "Ligue 1",
+            "Lyon": "Ligue 1",
+            "Marseille": "Ligue 1",
+            "Nice": "Ligue 1",
+            "Rennes": "Ligue 1",
+            "Saint-Etienne": "Ligue 1",
+            "Toulouse": "Ligue 1",
+            "Nantes": "Ligue 1",
+            
+            # Other leagues
             "Inter Miami": "MLS",
-            "Kawasaki Frontale": "J1 League"
+            "LAFC": "MLS",
+            "Toronto FC": "MLS",
+            "Kawasaki Frontale": "J1 League",
+            "PSV Eindhoven": "Eredivisie",
+            "Real Sociedad": "La Liga",
+            "Valencia": "La Liga",
+            "Porto": "Primeira Liga",
+            "Fenerbahçe": "Süper Lig",
+            "Besiktas": "Süper Lig",
+            "Plymouth Argyle": "Championship",
+            "Vissel Kobe": "J1 League",
+            
+            # Saudi League
+            "Al-Hilal": "Saudi Pro League",
+            "Al-Nassr": "Saudi Pro League",
+            "Al-Ittihad": "Saudi Pro League",
+            "Al-Ahli": "Saudi Pro League",
+            "Al-Ettifaq": "Saudi Pro League",
+            
+            # South American
+            "Boca Juniors": "Primera División",
+            "São Paulo": "Brasileirão",
+            "Millonarios": "Liga BetPlay",
+            "Santos": "Brasileirão",
+            "Flamengo": "Brasileirão",
+            "Palmeiras": "Brasileirão",
+            "Corinthians": "Brasileirão",
+            "Fluminense": "Brasileirão",
+            "Botafogo": "Brasileirão",
+            
+            # Turkish League
+            "Adana Demirspor": "Süper Lig",
+            
+            # American MLS
+            "New York City FC": "MLS", 
+            "New York Red Bulls": "MLS",
+            "New England Revolution": "MLS",
+            "Philadelphia Union": "MLS",
+            "Atlanta United": "MLS",
+            "Columbus Crew": "MLS",
+            "D.C. United": "MLS",
+            "Toronto FC": "MLS",
         }
         
         # Country to continent mapping
         self.country_continents = {
-            "Argentina": "South America",
-            "Egypt": "Africa",
-            "South Korea": "Asia",
-            "Japan": "Asia", 
+            # Europe
+            "England": "Europe",
             "Spain": "Europe",
-            "Ivory Coast": "Africa"
+            "France": "Europe",
+            "Germany": "Europe",
+            "Italy": "Europe",
+            "Portugal": "Europe",
+            "Netherlands": "Europe",
+            "Belgium": "Europe",
+            "Croatia": "Europe",
+            "Czech Republic": "Europe",
+            "Norway": "Europe",
+            "Poland": "Europe",
+            "Sweden": "Europe",
+            "Wales": "Europe",
+            "Georgia": "Europe",
+            "Serbia": "Europe",
+            
+            # South America
+            "Argentina": "South America",
+            "Brazil": "South America",
+            "Uruguay": "South America",
+            "Colombia": "South America",
+            "Chile": "South America",
+            "Peru": "South America",
+            "Ecuador": "South America",
+            "Bolivia": "South America",
+            "Paraguay": "South America",
+            "Costa Rica": "North America",
+            "Honduras": "North America",
+            
+            # Africa
+            "Egypt": "Africa",
+            "Ivory Coast": "Africa",
+            "Nigeria": "Africa",
+            "Algeria": "Africa",
+            "Senegal": "Africa",
+            "Morocco": "Africa",
+            "Tunisia": "Africa",
+            "Ghana": "Africa",
+            "Cameroon": "Africa",
+
+            # Asia
+            "South Korea": "Asia",
+            "Japan": "Asia",
+            "China": "Asia",
+            "Thailand": "Asia",
+            "Vietnam": "Asia",
+            
+            # North America
+            "United States": "North America",
+            "Mexico": "North America",
+            "Canada": "North America"
         }
         
         self.target_player = None
@@ -81,9 +217,16 @@ class GoaldleGame:
         """Compare ages with directional hints"""
         if guess_age == target_age:
             return ComparisonResult("age", str(guess_age), str(target_age), "exact")
+        elif abs(guess_age - target_age) == 1:
+            direction = "higher" if target_age > guess_age else "lower"
+            return ComparisonResult("age", str(guess_age), str(target_age), "partial", f"Target is {direction} by 1 year")
         elif abs(guess_age - target_age) <= 3:
             direction = "higher" if target_age > guess_age else "lower"
-            return ComparisonResult("age", str(guess_age), str(target_age), "partial", f"Target is {direction}")
+            diff = abs(guess_age - target_age)
+            return ComparisonResult("age", str(guess_age), str(target_age), "partial", f"Target is {direction} by {diff} years")
+        elif abs(guess_age - target_age) <= 8:
+            direction = "higher" if target_age > guess_age else "lower"
+            return ComparisonResult("age", str(guess_age), str(target_age), "none", f"Target is {direction}")
         else:
             direction = "much higher" if target_age > guess_age else "much lower"
             return ComparisonResult("age", str(guess_age), str(target_age), "none", f"Target is {direction}")
