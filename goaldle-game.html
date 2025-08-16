@@ -260,6 +260,13 @@
             min-height: 40px;
             padding: 8px;
             color: #000000;
+            position: relative;
+        }
+        
+        .guess-cell .arrow {
+            font-size: 16px;
+            margin-left: 4px;
+            font-weight: bold;
         }
         
         .guess-cell.exact {
@@ -824,7 +831,23 @@
                 const cells = currentRow.querySelectorAll('.guess-cell');
                 guessResult.comparisons.forEach((comp, index) => {
                     if (cells[index]) {
-                        cells[index].textContent = comp.guess_value;
+                        // Debug logging
+                        console.log(`Column ${index}: attribute=${comp.attribute}, status=${comp.status}, hint=${comp.hint}, value=${comp.guess_value}`);
+                        
+                        // Check if this is the age column (should be index 3: Name, Team, Position, Country, Age, Height)
+                        if (comp.attribute === 'age' && comp.status !== 'exact') {
+                            // Add arrow for age comparisons
+                            let arrow = '';
+                            if (comp.hint && comp.hint.includes('higher')) {
+                                arrow = ' ↑';
+                            } else if (comp.hint && comp.hint.includes('lower')) {
+                                arrow = ' ↓';
+                            }
+                            cells[index].innerHTML = `${comp.guess_value}<span class="arrow">${arrow}</span>`;
+                            console.log(`Added arrow: ${arrow} for age ${comp.guess_value}`);
+                        } else {
+                            cells[index].textContent = comp.guess_value;
+                        }
                         cells[index].className = `guess-cell ${comp.status}`;
                     }
                 });
