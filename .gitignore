@@ -61,3 +61,14 @@ cv-api/goals/blurred/
 *.pt
 *.pth
 *.onnx
+
+# Training datasets and ML artifacts
+**/dataset/
+**/datasets/
+**/training_data/
+**/football_dataset/
+**/data/
+runs/
+wandb/
+*.weights
+*.cfg
