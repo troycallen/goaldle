@@ -39,10 +39,25 @@ coverage/
 
 # Vercel
 .vercel
+.claude
 
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+.env
+
 # Computer vision files
 cv-api/goals/blurred/
+*.pt
+*.pth
+*.onnx
