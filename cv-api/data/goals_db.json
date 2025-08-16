@@ -28,11 +28,5 @@
     "original_video": "cv-api/goals/tatsuya_ito.mp4",
     "blurred_video": "cv-api/goals/blurred/tatsuya_ito_blurred.mp4",
     "scorer": "Tatsuya Ito"
-  },
-  {
-    "id": "6",
-    "original_video": "cv-api/goals/yamal.mp4",
-    "blurred_video": "cv-api/goals/blurred/yamal_blurred.mp4",
-    "scorer": "Lamine Yamal"
   }
 ]
