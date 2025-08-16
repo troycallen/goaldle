@@ -264,9 +264,21 @@
         }
         
         .guess-cell .arrow {
-            font-size: 16px;
-            margin-left: 4px;
+            font-size: 20px;
+            margin-left: 6px;
             font-weight: bold;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .guess-cell.partial .arrow {
+            color: #ffffff;
+            font-size: 22px;
+        }
+        
+        .guess-cell.none .arrow {
+            color: #ffffff;
+            font-size: 22px;
         }
         
         .guess-cell.exact {
@@ -839,9 +851,9 @@
                             // Add arrow for age comparisons
                             let arrow = '';
                             if (comp.hint && comp.hint.includes('higher')) {
-                                arrow = ' ↑';
+                                arrow = ' ⬆️';
                             } else if (comp.hint && comp.hint.includes('lower')) {
-                                arrow = ' ↓';
+                                arrow = ' ⬇️';
                             }
                             cells[index].innerHTML = `${comp.guess_value}<span class="arrow">${arrow}</span>`;
                             console.log(`Added arrow: ${arrow} for age ${comp.guess_value}`);
