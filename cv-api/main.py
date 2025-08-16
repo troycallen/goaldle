@@ -246,30 +246,57 @@ class HybridGoaldleCV:
         return intersection / union if union > 0 else 0.0
     
     def blur_players(self, frame, tracks):
-        """Your improved mask processing"""
+        """Smooth blurring with feathered edges instead of hard silhouettes"""
         result = frame.copy()
         h, w = frame.shape[:2]
+        
+        # Create a combined mask for all tracked objects
+        combined_mask = np.zeros((h, w), dtype=np.float32)
         
         for x1, y1, x2, y2, track_id, mask in tracks:
             # Resize mask to frame size if needed
             if mask.shape != (h, w):
-                mask_resized = cv2.resize(mask, (w, h), interpolation=cv2.INTER_NEAREST)
+                mask_resized = cv2.resize(mask, (w, h), interpolation=cv2.INTER_LINEAR)
             else:
-                mask_resized = mask
+                mask_resized = mask.copy()
             
-            # Your tight mask processing
-            binary_mask = (mask_resized > 0.5).astype(np.uint8)  # Higher threshold
+            # Normalize mask to 0-1 range
+            mask_norm = mask_resized.astype(np.float32)
+            if mask_norm.max() > 1.0:
+                mask_norm = mask_norm / 255.0
             
-            # Minimal morphological operations
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-            binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+            # Smooth the mask edges significantly
+            mask_smooth = cv2.GaussianBlur(mask_norm, (21, 21), 8.0)
             
-            # Light smoothing
-            binary_mask = cv2.GaussianBlur(binary_mask.astype(np.float32), (3, 3), 0)
-            binary_mask = (binary_mask > 0.5).astype(np.uint8)
+            # Apply morphological operations for smoother edges
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            mask_smooth = cv2.morphologyEx(mask_smooth, cv2.MORPH_CLOSE, kernel)
+            mask_smooth = cv2.morphologyEx(mask_smooth, cv2.MORPH_OPEN, kernel)
             
-            # Apply black silhouette
-            result[binary_mask == 1] = [0, 0, 0]
+            # Additional edge feathering
+            mask_feathered = cv2.GaussianBlur(mask_smooth, (15, 15), 5.0)
+            
+            # Combine with existing mask (take maximum)
+            combined_mask = np.maximum(combined_mask, mask_feathered)
+        
+        if combined_mask.max() > 0:
+            # Create black overlay
+            black_overlay = np.zeros_like(result, dtype=np.uint8)
+            
+            # Create heavily blurred version 
+            blurred_frame = cv2.GaussianBlur(result, (71, 71), 30.0)
+            blurred_frame = cv2.GaussianBlur(blurred_frame, (71, 71), 30.0)  # Double blur
+            
+            # Expand the mask dimensions for 3-channel blending
+            mask_3d = np.expand_dims(combined_mask, axis=2)
+            mask_3d = np.repeat(mask_3d, 3, axis=2)
+            
+            # Blend: 80% black + 20% heavily blurred background
+            masked_area = black_overlay * 0.8 + blurred_frame * 0.2
+            
+            # Apply the masked area to the result
+            result = result * (1 - mask_3d) + masked_area * mask_3d
+            result = result.astype(np.uint8)
         
         return result
     
