@@ -265,9 +265,9 @@ class HybridGoaldleCV:
             if mask_norm.max() > 1.0:
                 mask_norm = mask_norm / 255.0
             
-            # Moderately expand the mask to fill gaps
-            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=2)
+            # Lightly expand the mask to fill gaps
+            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=1)
             
             # Smooth the expanded mask edges
             mask_smooth = cv2.GaussianBlur(mask_expanded, (25, 25), 8.0)
