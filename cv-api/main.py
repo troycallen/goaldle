@@ -265,16 +265,19 @@ class HybridGoaldleCV:
             if mask_norm.max() > 1.0:
                 mask_norm = mask_norm / 255.0
             
-            # Smooth the mask edges significantly
-            mask_smooth = cv2.GaussianBlur(mask_norm, (21, 21), 8.0)
+            # Moderately expand the mask to fill gaps
+            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=2)
             
-            # Apply morphological operations for smoother edges
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            # Smooth the expanded mask edges
+            mask_smooth = cv2.GaussianBlur(mask_expanded, (25, 25), 8.0)
+            
+            # Apply morphological operations for better body coverage
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
             mask_smooth = cv2.morphologyEx(mask_smooth, cv2.MORPH_CLOSE, kernel)
-            mask_smooth = cv2.morphologyEx(mask_smooth, cv2.MORPH_OPEN, kernel)
             
-            # Additional edge feathering
-            mask_feathered = cv2.GaussianBlur(mask_smooth, (15, 15), 5.0)
+            # Edge feathering for smooth transitions
+            mask_feathered = cv2.GaussianBlur(mask_smooth, (19, 19), 6.0)
             
             # Combine with existing mask (take maximum)
             combined_mask = np.maximum(combined_mask, mask_feathered)
