@@ -43,7 +43,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 class HybridGoaldleCV:
     def __init__(self):
         # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
-        self.yolo = YOLO('yolov8n-seg.pt')  # Use smaller model to avoid GitHub file size limits  
+        self.yolo = YOLO('runs/detect/football_players_detect/weights/best.pt')  # Use football-trained model  
         self.tracks = {}
         self.next_id = 0
         self.max_disappeared = 30  # Your good parameter
@@ -108,19 +108,22 @@ class HybridGoaldleCV:
     
     def detect_and_track(self, frame):
         # YOLOv8 detection with your parameters
-        results = self.yolo(frame, classes=[0], verbose=False, conf=self.min_confidence)
+        results = self.yolo(frame, classes=[2], verbose=False, conf=self.min_confidence)  # Class 2 = 'player' in football model
         detections = []
         
         for result in results:
-            if result.boxes is not None and result.masks is not None:
-                for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
+            if result.boxes is not None:
+                for box in result.boxes:
                     x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
                     conf = float(box.conf[0].cpu().numpy())
                     
                     # Basic size filtering
                     bbox_area = (x2 - x1) * (y2 - y1)
                     if bbox_area > 500:  # Minimum reasonable size
-                        mask_data = mask.data[0].cpu().numpy()
+                        # Create rectangular mask from bounding box
+                        h, w = frame.shape[:2]
+                        mask_data = np.zeros((h, w), dtype=np.float32)
+                        mask_data[y1:y2, x1:x2] = 1.0
                         features = self.get_simple_features((x1, y1, x2, y2), mask_data, frame)
                         detections.append((x1, y1, x2, y2, conf, mask_data, features))
         
