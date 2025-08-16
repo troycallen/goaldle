@@ -902,12 +902,25 @@
             recapTime.textContent = timeStr;
             
             // Get the correct answer from the right place
+            console.log('Game result for recap:', result);
+            console.log('Current game state:', currentGame);
+            
             let playerName = 'Unknown';
-            if (result.target_player && result.target_player.name) {
+            
+            // Try different sources for the player name
+            if (result.guess_result && result.guess_result.player && result.guess_result.player.name) {
+                // Winner case: the last guess contains the correct player
+                playerName = result.guess_result.player.name;
+            } else if (currentGame && currentGame.goal_info && currentGame.goal_info.player_name) {
+                // Use player name from game start
+                playerName = currentGame.goal_info.player_name;
+            } else if (result.target_player && result.target_player.name) {
                 playerName = result.target_player.name;
             } else if (currentGame && currentGame.target_player && currentGame.target_player.name) {
                 playerName = currentGame.target_player.name;
             }
+            
+            console.log('Setting player name to:', playerName);
             recapAnswerPlayer.textContent = playerName;
         }
 
