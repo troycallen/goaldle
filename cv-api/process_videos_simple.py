@@ -65,7 +65,7 @@ def main():
         original_path = goal['original_video']
         scorer = goal['scorer']
         
-        # Fix the path - remove cv-api/ prefix since we're running from cv-api directory
+        # Fix the path -
         actual_path = original_path.replace("cv-api/", "")
         
         # Create blurred video path

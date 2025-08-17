@@ -61,9 +61,6 @@ class VideoManager:
         with open(blurred_path, 'wb') as f:
             f.write(blurred_video_bytes)
         
-        # Note: For this simple format, we don't update the database with blurred paths
-        # Blurred videos are stored in the blurred/ directory with predictable names
-        
         
         return blurred_path
     

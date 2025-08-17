@@ -42,14 +42,13 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 class HybridGoaldleCV:
     def __init__(self):
-        # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
-        self.yolo = YOLO('runs/detect/football_players_detect/weights/best.pt')  # Use football-trained model  
+        self.yolo = YOLO('yolov8n-seg.pt')
         self.tracks = {}
         self.next_id = 0
-        self.max_disappeared = 30  # Your good parameter
-        self.min_confidence = 0.3  # Your parameter - keeps more detections
-        self.max_distance = 150    # Your parameter - more lenient matching
-        self.min_iou = 0.1        # Your parameter
+        self.max_disappeared = 30 
+        self.min_confidence = 0.3  
+        self.max_distance = 150    
+        self.min_iou = 0.1        
         
     def get_simple_features(self, bbox, mask, frame):
         """Simplified feature extraction - faster than full histogram"""
