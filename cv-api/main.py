@@ -43,9 +43,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 class HybridGoaldleCV:
     def __init__(self):
         # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
-        # Use standard YOLOv8 model for better compatibility
-        self.yolo = YOLO('yolov8n-seg.pt')
-        print("✅ Loaded standard YOLOv8n-seg model")  
+        self.yolo = YOLO('yolov8n-seg.pt')  # Use smaller model to avoid GitHub file size limits  
         self.tracks = {}
         self.next_id = 0
         self.max_disappeared = 30  # Your good parameter
@@ -109,37 +107,22 @@ class HybridGoaldleCV:
         return similarity
     
     def detect_and_track(self, frame):
-        # YOLOv8 detection with standard model parameters
-        results = self.yolo(frame, classes=[0], verbose=False, conf=self.min_confidence)  # Class 0 = 'person' in standard model
+        # YOLOv8 detection with your parameters
+        results = self.yolo(frame, classes=[0], verbose=False, conf=self.min_confidence)
         detections = []
         
-        # Debug: Print detection results
-        print(f"🔍 YOLO results: {len(results)} result objects")
-        
         for result in results:
-            if result.boxes is not None:
-                print(f"📦 Boxes found: {len(result.boxes)}")
-                for box in result.boxes:
+            if result.boxes is not None and result.masks is not None:
+                for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
                     x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
                     conf = float(box.conf[0].cpu().numpy())
-                    print(f"🎯 Detection: ({x1},{y1},{x2},{y2}) conf={conf:.3f}")
                     
                     # Basic size filtering
                     bbox_area = (x2 - x1) * (y2 - y1)
                     if bbox_area > 500:  # Minimum reasonable size
-                        # Create rectangular mask from bounding box
-                        h, w = frame.shape[:2]
-                        mask_data = np.zeros((h, w), dtype=np.float32)
-                        mask_data[y1:y2, x1:x2] = 1.0
+                        mask_data = mask.data[0].cpu().numpy()
                         features = self.get_simple_features((x1, y1, x2, y2), mask_data, frame)
                         detections.append((x1, y1, x2, y2, conf, mask_data, features))
-                        print(f"✅ Added detection: area={bbox_area}")
-                    else:
-                        print(f"❌ Filtered out: area={bbox_area} < 500")
-            else:
-                print("❌ No boxes in result")
-        
-        print(f"🎯 Total detections after filtering: {len(detections)}")
         
         # Use Hungarian algorithm for assignment (prevents blinking)
         if len(detections) > 0 and len(self.tracks) > 0:
@@ -282,9 +265,9 @@ class HybridGoaldleCV:
             if mask_norm.max() > 1.0:
                 mask_norm = mask_norm / 255.0
             
-            # Lightly expand the mask to fill gaps
-            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=1)
+            # Moderately expand the mask to fill gaps
+            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=2)
             
             # Smooth the expanded mask edges
             mask_smooth = cv2.GaussianBlur(mask_expanded, (25, 25), 8.0)
