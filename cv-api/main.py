@@ -35,6 +35,7 @@ from ultralytics import YOLO
 from collections import defaultdict
 from scipy.optimize import linear_sum_assignment
 from game_logic import GoaldleGame
+from simple_stats import SimpleStatsManager
 
 # create app and add cors
 app = FastAPI(title="GoalDle CV API", version="1.0")
@@ -358,13 +359,20 @@ class HybridGoaldleCV:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-# Initialize CV and Game instances
+# Initialize CV, Game, and Stats instances
 cv = HybridGoaldleCV()
 game = GoaldleGame()
+stats = SimpleStatsManager()
 
 # Pydantic models for API
 class GuessRequest(BaseModel):
     player_name: str
+
+class GameResult(BaseModel):
+    player_name: str
+    is_winner: bool
+    total_guesses: int
+    time_taken: int = None
 
 
 @app.get("/")
@@ -507,7 +515,59 @@ async def integrate_video_with_game(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# === SIMPLE STATS ENDPOINTS ===
+
+@app.get("/stats")
+async def get_stats():
+    """Get personal game statistics"""
+    try:
+        stats_summary = stats.get_stats_summary()
+        return JSONResponse(content=stats_summary)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stats/detailed")
+async def get_detailed_stats():
+    """Get detailed statistics with history"""
+    try:
+        detailed_stats = stats.get_detailed_stats()
+        return JSONResponse(content=detailed_stats)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/stats/record-game")
+async def record_game(game_result: GameResult):
+    """Record a completed game"""
+    try:
+        stats.record_game(
+            player_name=game_result.player_name,
+            is_winner=game_result.is_winner,
+            total_guesses=game_result.total_guesses,
+            time_taken=game_result.time_taken
+        )
+        return JSONResponse(content={"success": True, "message": "Game recorded"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stats/export")
+async def export_stats():
+    """Export stats as formatted text"""
+    try:
+        export_text = stats.export_stats()
+        return JSONResponse(content={"stats_text": export_text})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/stats/reset")
+async def reset_stats():
+    """Reset all statistics"""
+    try:
+        stats.reset_stats()
+        return JSONResponse(content={"success": True, "message": "Stats reset"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting GoalDle CV API - Hybrid Approach...")
+    print("🚀 Starting GoalDle CV API - Now with Personal Stats!")
     uvicorn.run(app, host="0.0.0.0", port=8001)
