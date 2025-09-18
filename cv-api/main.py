@@ -376,6 +376,16 @@ async def serve_game():
     with open("goaldle-game.html", "r") as f:
         return f.read()
 
+@app.get("/faq", response_class=HTMLResponse)
+async def serve_faq():
+    with open("faq.html", "r") as f:
+        return f.read()
+
+@app.get("/contact", response_class=HTMLResponse)
+async def serve_contact():
+    with open("contact.html", "r") as f:
+        return f.read()
+
 
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
