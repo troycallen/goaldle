@@ -1,4 +1,4 @@
-# 🥅 Goaldle
+# GOALDLE
 
 **Play now at [goaldle.com](https://goaldle.com)**
 
