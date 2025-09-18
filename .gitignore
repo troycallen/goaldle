@@ -56,6 +56,8 @@ env/
 .venv/
 .env
 
+cv-api\upload-test.html
+
 # Computer vision files
 #cv-api/goals/
 #cv-api/goals/blurred/
