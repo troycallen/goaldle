@@ -269,7 +269,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch('http://localhost:8001/process-video', {
+                const response = await fetch('/process-video', {
                     method: 'POST',
                     body: formData
                 });
