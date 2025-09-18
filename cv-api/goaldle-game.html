@@ -499,6 +499,130 @@
             background: #3182ce;
             font-weight: bold;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #2d3748;
+            margin: 5% auto;
+            padding: 0;
+            border: 2px solid #4a5568;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background: #3182ce;
+            padding: 20px;
+            border-radius: 13px 13px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 10px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+            color: #e2e8f0;
+        }
+
+        .how-to-step {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .how-to-step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .how-to-step h3 {
+            color: #81c4f7;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .how-to-step p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .how-to-step ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .how-to-step li {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .correct {
+            color: #68d391;
+            font-weight: bold;
+        }
+
+        .close-guess {
+            color: #f6e05e;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: #fc8181;
+            font-weight: bold;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                max-height: 70vh;
+            }
+
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1045,13 +1169,79 @@
         }
 
 
+        // Modal functionality
+        function initializeModal() {
+            const modal = document.getElementById('howToPlayModal');
+            const howToPlayLink = document.querySelector('a[href="#"]:nth-of-type(2)'); // "How to Play" link
+            const closeBtn = document.querySelector('.close');
+
+            // Open modal when "How to Play" is clicked
+            howToPlayLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                modal.style.display = 'block';
+            });
+
+            // Close modal when X is clicked
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside of it
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Close modal with Escape key
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
         // Initialize - auto-load first game
         async function initialize() {
             await loadPlayers();
             await startNewGame();
+            initializeModal(); // Initialize modal functionality
         }
         
         initialize();
     </script>
+
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🥅 How to Play Goaldle</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="how-to-step">
+                    <h3>🎥 Watch & Guess</h3>
+                    <p>Watch a blurred goal video and guess the scorer. Use context clues like stadium, teammates, and celebration style.</p>
+                </div>
+
+                <div class="how-to-step">
+                    <h3>🎯 Feedback Categories</h3>
+                    <p>Each guess gives clues about:</p>
+                    <ul>
+                        <li><strong>Team</strong> - Club at time of scoring</li>
+                        <li><strong>Country</strong> - Player's nationality</li>
+                        <li><strong>Age</strong> - How old they are</li>
+                        <li><strong>Height</strong> - Player's height</li>
+                        <li><strong>Position</strong> - Field position</li>
+                    </ul>
+                </div>
+
+                <div class="how-to-step">
+                    <h3>⏱️ 6 Attempts</h3>
+                    <p><span class="correct">🟢 Exact match</span> | <span class="close-guess">🟡 Close</span> | <span class="wrong">🔴 Wrong</span> | ⬆️⬇️ Higher/Lower</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
