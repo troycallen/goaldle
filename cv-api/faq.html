@@ -200,15 +200,15 @@
         <div class="header">
             <div class="header-content">
                 <div class="nav-links">
-                    <a href="goaldle-game.html" class="nav-link">Home</a>
+                    <a href="/" class="nav-link">Home</a>
                     <span class="nav-separator">|</span>
-                    <a href="goaldle-game.html" class="nav-link">How to Play</a>
+                    <a href="/" class="nav-link">How to Play</a>
                 </div>
                 <h1>⚽ Goaldle ⚽</h1>
                 <div class="nav-links">
-                    <a href="faq.html" class="nav-link">FAQ</a>
+                    <a href="/faq" class="nav-link">FAQ</a>
                     <span class="nav-separator">|</span>
-                    <a href="contact.html" class="nav-link">Contact</a>
+                    <a href="/contact" class="nav-link">Contact</a>
                 </div>
             </div>
         </div>
@@ -241,10 +241,32 @@
             <div class="faq-item">
                 <h3 class="faq-question">💡 Can I make a suggestion?</h3>
                 <div class="faq-answer">
-                    <p>Yes! Head to the  <a href="contact.html" style="color: #81c4f7;">contact</a> page if you have any feedback or suggestions.</p>
+                    <p>Yes! Head to the  <a href="/contact" style="color: #81c4f7;">contact</a> page if you have any feedback or suggestions.</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Fix navigation links for both local and production
+        function fixNavigationLinks() {
+            const isLocal = window.location.protocol === 'file:';
+            if (isLocal) {
+                // Update links for local file testing
+                document.querySelectorAll('a[href="/"]').forEach(link => {
+                    link.href = 'goaldle-game.html';
+                });
+                document.querySelectorAll('a[href="/faq"]').forEach(link => {
+                    link.href = 'faq.html';
+                });
+                document.querySelectorAll('a[href="/contact"]').forEach(link => {
+                    link.href = 'contact.html';
+                });
+            }
+        }
+
+        // Initialize navigation fixes
+        document.addEventListener('DOMContentLoaded', fixNavigationLinks);
+    </script>
 </body>
 </html>
