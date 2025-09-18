@@ -8,7 +8,7 @@ import os
 # import everything
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import cv2
@@ -366,9 +366,15 @@ class GameResult(BaseModel):
     time_taken: int = None
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"message": "GoalDle CV API - Hybrid Approach", "status": "ready"}
+    with open("goaldle-game.html", "r") as f:
+        return f.read()
+
+@app.get("/game", response_class=HTMLResponse)
+async def serve_game():
+    with open("goaldle-game.html", "r") as f:
+        return f.read()
 
 
 @app.post("/process-video")
