@@ -1259,14 +1259,9 @@
                 });
             }
 
-            // Set favicon paths based on environment
-            if (isLocal) {
-                favicon.href = 'favicon.png';  // Relative for local
-                headerFavicon.src = 'favicon.png';  // Relative for local
-            } else {
-                favicon.href = '/favicon.png';  // Absolute for production
-                headerFavicon.src = '/favicon.png';  // Absolute for production
-            }
+            // Set favicon paths - use relative since serving from cv-api/
+            favicon.href = 'favicon.png';
+            headerFavicon.src = 'favicon.png';
         }
 
         // Initialize - auto-load first game
