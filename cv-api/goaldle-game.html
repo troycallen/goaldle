@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goaldle</title>
+    <link rel="icon" type="image/png" href="favicon.png" id="favicon">
     <style>
         * {
             margin: 0;
@@ -1221,9 +1222,11 @@
             });
         }
 
-        // Fix navigation links for both local and production
+        // Fix navigation links and favicon for both local and production
         function fixNavigationLinks() {
             const isLocal = window.location.protocol === 'file:';
+            const favicon = document.getElementById('favicon');
+
             if (isLocal) {
                 // Update links for local file testing
                 document.querySelectorAll('a[href="/"]').forEach(link => {
@@ -1235,6 +1238,11 @@
                 document.querySelectorAll('a[href="/contact"]').forEach(link => {
                     link.href = 'contact.html';
                 });
+                // Keep relative favicon path for local
+                favicon.href = 'favicon.png';
+            } else {
+                // Use absolute path for production
+                favicon.href = '/favicon.png';
             }
         }
 
