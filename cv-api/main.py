@@ -9,6 +9,7 @@ import os
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import cv2
 import numpy as np
@@ -24,6 +25,9 @@ from simple_stats import SimpleStatsManager
 # create app and add cors
 app = FastAPI(title="GoalDle CV API", version="1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=False)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 class HybridGoaldleCV:
     def __init__(self):
