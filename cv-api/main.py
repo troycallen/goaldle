@@ -344,8 +344,11 @@ class HybridGoaldleCV:
             return {"success": False, "error": str(e)}
 
 # Initialize CV, Game, and Stats instances
+import os
 cv = HybridGoaldleCV()
-game = GoaldleGame()
+db_path = os.path.join(os.path.dirname(__file__), "data/players_db.json")
+print(f"Looking for database at: {db_path}")
+game = GoaldleGame(db_path)
 stats = SimpleStatsManager()
 
 # Pydantic models for API
