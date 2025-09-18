@@ -677,6 +677,9 @@
         const recapTime = document.getElementById('recapTime');
         const recapAnswerPlayer = document.getElementById('recapAnswerPlayer');
 
+        // API configuration
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
+
         let availablePlayers = [];
         let currentGame = null;
         let currentGuessRow = 0;
@@ -685,7 +688,7 @@
         // Load available players
         async function loadPlayers() {
             try {
-                const response = await fetch('/game/players');
+                const response = await fetch(`${API_BASE}/game/players`);
                 const data = await response.json();
                 availablePlayers = data.players;
             } catch (error) {
@@ -701,7 +704,7 @@
             giveUpBtn.disabled = true;
 
             try {
-                const response = await fetch('/game/start-with-video', {
+                const response = await fetch(`${API_BASE}/game/start-with-video`, {
                     method: 'POST'
                 });
 
@@ -807,7 +810,7 @@
             if (!player) return;
 
             try {
-                const response = await fetch('/game/guess', {
+                const response = await fetch(`${API_BASE}/game/guess`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ player_name: player })
@@ -927,7 +930,7 @@
         // Show video reveal after game ends - replace the current video
         async function showVideoReveal() {
             try {
-                const response = await fetch('/game/video-reveal');
+                const response = await fetch(`${API_BASE}/game/video-reveal`);
                 const result = await response.json();
                 
                 if (result.success && result.reveal_data.videos.original_video) {
@@ -948,7 +951,7 @@
                 await showVideoReveal();
                 
                 // Show lose message with correct answer
-                const response = await fetch('/game/video-reveal');
+                const response = await fetch(`${API_BASE}/game/video-reveal`);
                 const result = await response.json();
                 
                 if (result.success) {

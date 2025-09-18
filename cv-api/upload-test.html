@@ -201,6 +201,9 @@
     </div>
 
     <script>
+        // API configuration
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8001' : '';
+
         const uploadArea = document.getElementById('uploadArea');
         const videoFile = document.getElementById('videoFile');
         const uploadBtn = document.getElementById('uploadBtn');
@@ -269,7 +272,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch('/process-video', {
+                const response = await fetch(`${API_BASE}/process-video`, {
                     method: 'POST',
                     body: formData
                 });
