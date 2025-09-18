@@ -140,8 +140,8 @@
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #3182ce;
-            background: rgba(49, 130, 206, 0.1);
+            border-color: #ffeb3b;
+            background: rgba(255, 235, 59, 0.1);
         }
 
         .form-group textarea {
@@ -150,9 +150,9 @@
         }
 
         .submit-btn {
-            background: #3182ce;
-            color: white;
-            border: 2px solid #2c5282;
+            background: #ffeb3b;
+            color: #191919;
+            border: 2px solid #fdd835;
             padding: 12px 30px;
             border-radius: 8px;
             cursor: pointer;
@@ -163,7 +163,7 @@
         }
 
         .submit-btn:hover:not(:disabled) {
-            background: #2c5282;
+            background: #fdd835;
         }
 
         .submit-btn:disabled {
@@ -238,14 +238,14 @@
         <div class="header">
             <div class="header-content">
                 <div class="nav-links">
-                    <a href="/" class="nav-link">Home</a>
+                    <a href="/" style="display: inline-flex; align-items: center; background: #191919; padding: 2px 8px; border-radius: 4px; border: 2px solid #ffeb3b; font-size: 1.6rem; text-decoration: none; color: #ffffff;">
+                        <img src="favicon.png" alt="⚽" style="width: 28px; height: 28px; margin-right: 6px;">
+                        <span>Goaldle</span>
+                    </a>
                     <span class="nav-separator">|</span>
                     <a href="/" class="nav-link">How to Play</a>
                 </div>
-                <h1 style="display: inline-flex; align-items: center; background: #191919; padding: 2px 8px; border-radius: 4px; border: 2px solid #4a5568; font-size: 1.6rem; justify-self: center;">
-                    <img src="favicon.png" alt="⚽" style="width: 28px; height: 28px; margin-right: 6px;">
-                    <span>Goaldle</span>
-                </h1>
+                <h1></h1>
                 <div class="nav-links">
                     <a href="/faq" class="nav-link">FAQ</a>
                     <span class="nav-separator">|</span>
