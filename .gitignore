@@ -54,9 +54,8 @@ __pycache__/
 venv/
 env/
 .venv/
-.env
 
-cv-api\upload-test.html
+cv-api/upload-test.html
 
 # Computer vision files
 #cv-api/goals/
@@ -64,13 +63,6 @@ cv-api\upload-test.html
 *.pt
 *.pth
 *.onnx
-
-# Video files
-#*.mp4
-*.avi
-*.mov
-*.mkv
-*.webm
 
 # Training datasets and ML artifacts
 **/dataset/
