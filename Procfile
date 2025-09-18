@@ -1,0 +1,1 @@
+web: cd cv-api && python main.py
