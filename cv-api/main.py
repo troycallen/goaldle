@@ -15,8 +15,8 @@ def install_deps():
         print("✅ All dependencies already installed")
     except ImportError:
         print("📦 Installing dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", 
-                             "opencv-python", "ultralytics", "mediapipe", 
+        subprocess.check_call([sys.executable, "-m", "pip", "install",
+                             "opencv-python-headless", "ultralytics", "mediapipe",
                              "torch", "fastapi", "uvicorn", "python-multipart", "scipy"])
 
 install_deps()
