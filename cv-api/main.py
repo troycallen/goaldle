@@ -3,23 +3,7 @@ import subprocess
 import sys
 import os
 
-# install dependencies
-def install_deps():
-    try:
-        import cv2
-        import ultralytics
-        import mediapipe
-        import torch
-        import fastapi
-        import scipy
-        print("✅ All dependencies already installed")
-    except ImportError:
-        print("📦 Installing dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install",
-                             "opencv-python-headless", "ultralytics", "mediapipe",
-                             "torch", "fastapi", "uvicorn", "python-multipart", "scipy"])
-
-install_deps()
+# Dependencies are installed via requirements.txt
 
 # import everything
 from fastapi import FastAPI, File, UploadFile, HTTPException
