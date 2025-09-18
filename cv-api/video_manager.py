@@ -7,11 +7,30 @@ import random
 class VideoManager:
     def __init__(self, goals_db_path: str = None, goals_dir: str = None):
         if goals_db_path is None:
-            goals_db_path = os.path.join(os.path.dirname(__file__), "data/goals_db.json")
+            # Try multiple possible paths for robustness
+            possible_paths = [
+                os.path.join(os.path.dirname(__file__), "data/goals_db.json"),
+                os.path.join(os.getcwd(), "data/goals_db.json"),
+                "data/goals_db.json"
+            ]
+            goals_db_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    goals_db_path = path
+                    break
+
+            if goals_db_path is None:
+                # Create the data directory and raise a more helpful error
+                data_dir = os.path.join(os.path.dirname(__file__), "data")
+                os.makedirs(data_dir, exist_ok=True)
+                raise FileNotFoundError(f"goals_db.json not found. Searched paths: {possible_paths}. Current working directory: {os.getcwd()}")
+
         if goals_dir is None:
             goals_dir = os.path.join(os.path.dirname(__file__), "goals")
 
         print(f"VideoManager looking for goals_db at: {goals_db_path}")
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"__file__ directory: {os.path.dirname(__file__)}")
 
         self.goals_db_path = goals_db_path
         self.goals_dir = goals_dir
