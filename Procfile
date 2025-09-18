@@ -1,1 +1,1 @@
-web: python cv-api/main.py
+web: cd cv-api && python main.py
