@@ -569,5 +569,7 @@ async def reset_stats():
 
 if __name__ == "__main__":
     import uvicorn
+    import os
     print("🚀 Starting GoalDle CV API - Now with Personal Stats!")
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run(app, host="0.0.0.0", port=port)
