@@ -1,18 +1,44 @@
-# Goaldle
+# 🥅 Goaldle
 
-A soccer goal guessing game where players watch blurred videos and try to identify the scorer.
+**Play now at [goaldle.com](https://goaldle.com)**
 
-## Overview
+A daily soccer goal guessing game. Watch famous goals with players blurred out and guess who scored in 6 tries or less.
 
-Goaldle is like Wordle but for soccer goals. Watch famous goal clips where the players are blacked out and guess who scored. You get 6 attempts and context clues from the stadium, crowd, and other players.
+## How to Play
 
-**Features:**
-- Daily challenges with different goals
-- Personal stats tracking (win rate, streaks, guess distribution)
-- Player name autocomplete
-- Game history and export
+1. 🎥 Watch the blurred goal video
+2. 🔍 Use context clues (stadium, teammates, celebration style)
+3. ⌨️ Type a player name and submit your guess
+4. 📊 Get feedback and try again (max 6 attempts)
+5. 🔄 Share your results and come back tomorrow!
 
-## Setup
+## Features
+
+- 🎯 Daily challenges with iconic goals
+- 📊 Personal stats tracking (win rate, streaks, guess distribution)
+- 🔥 Streak counter
+- 📱 Mobile-friendly
+- 🎮 Shareable results
+- 💡 Player name autocomplete
+- 📈 Game history and export
+
+## How It Works
+
+1. **Player Detection**: Uses YOLOv8 to detect players in soccer videos
+2. **Player Masking**: Applies black silhouettes to tracked players while keeping everything else visible
+3. **Game Logic**: Manages guessing, scoring, and player database
+4. **Stats Tracking**: Records your performance locally
+
+You get context from the stadium, teammates, celebration style, etc. - just not the scorer's identity.
+
+## Technology Stack
+
+**Backend**: FastAPI, OpenCV, PyTorch, YOLOv8
+**Frontend**: HTML/CSS/JavaScript
+**Stats**: JSON file storage
+**Computer Vision**: YOLO object detection with Hungarian algorithm tracking
+
+## Local Development
 
 ```bash
 cd cv-api
@@ -20,22 +46,6 @@ python main.py
 ```
 
 Dependencies install automatically. Then open `goaldle-game.html` in your browser.
-
-## How It Works
-
-1. **Player Detection**: Uses YOLOv8 to detect players in soccer videos
-2. **Player Masking**: Applies black silhouettes to tracked players while keeping everything else visible
-3. **Game Logic**: Manages guessing, scoring, and player database
-4. **Stats Tracking**: Records your performance in a local JSON file
-
-You get context from the stadium, teammates, celebration style, etc. - just not the scorer's identity.
-
-## Technology Stack
-
-**Backend**: FastAPI, OpenCV, PyTorch, YOLOv8  
-**Frontend**: HTML/CSS/JavaScript  
-**Stats**: JSON file storage  
-**Computer Vision**: YOLO object detection with Hungarian algorithm tracking  
 
 ## API Endpoints
 
