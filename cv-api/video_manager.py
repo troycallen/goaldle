@@ -11,6 +11,8 @@ class VideoManager:
         if goals_dir is None:
             goals_dir = os.path.join(os.path.dirname(__file__), "goals")
 
+        print(f"VideoManager looking for goals_db at: {goals_db_path}")
+
         self.goals_db_path = goals_db_path
         self.goals_dir = goals_dir
         self.blurred_dir = os.path.join(os.path.dirname(__file__), "goals/blurred")

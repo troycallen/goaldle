@@ -3,7 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "pip install opencv-python-headless --force-reinstall --no-deps && python cv-api/main.py",
+    "startCommand": "pip install opencv-python-headless --force-reinstall --no-deps && cd cv-api && python main.py",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
