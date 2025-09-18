@@ -57,10 +57,18 @@ env/
 .env
 
 # Computer vision files
+cv-api/goals/
 cv-api/goals/blurred/
 *.pt
 *.pth
 *.onnx
+
+# Video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
 
 # Training datasets and ML artifacts
 **/dataset/
