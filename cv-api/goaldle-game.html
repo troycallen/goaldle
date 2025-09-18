@@ -42,25 +42,40 @@
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
             width: 100%;
             padding: 0 40px;
         }
-        
+
+        .nav-links:first-child {
+            justify-self: start;
+        }
+
+        .nav-links:last-child {
+            justify-self: end;
+        }
+
         h1 {
             font-size: 2.0rem;
             margin: 0;
             font-weight: 700;
             color: #e2e8f0;
-            flex-grow: 1;
             text-align: center;
+            justify-self: center;
         }
         
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-separator {
+            color: #4a5568;
+            font-weight: 300;
+            user-select: none;
         }
         
         .nav-link {
@@ -631,11 +646,13 @@
             <div class="header-content">
                 <div class="nav-links">
                     <a href="#" class="nav-link">Home</a>
+                    <span class="nav-separator">|</span>
                     <a href="#" class="nav-link">How to Play</a>
                 </div>
                 <h1>⚽ Goaldle ⚽</h1>
                 <div class="nav-links">
-                    <a href="#" class="nav-link">About</a>
+                    <a href="#" class="nav-link">FAQ</a>
+                    <span class="nav-separator">|</span>
                     <a href="#" class="nav-link">Contact</a>
                 </div>
             </div>
@@ -1172,14 +1189,17 @@
         // Modal functionality
         function initializeModal() {
             const modal = document.getElementById('howToPlayModal');
-            const howToPlayLink = document.querySelector('a[href="#"]:nth-of-type(2)'); // "How to Play" link
+            const navLinks = document.querySelectorAll('.nav-link');
+            const howToPlayLink = Array.from(navLinks).find(link => link.textContent === 'How to Play');
             const closeBtn = document.querySelector('.close');
 
             // Open modal when "How to Play" is clicked
-            howToPlayLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                modal.style.display = 'block';
-            });
+            if (howToPlayLink) {
+                howToPlayLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    modal.style.display = 'block';
+                });
+            }
 
             // Close modal when X is clicked
             closeBtn.addEventListener('click', function() {
@@ -1221,7 +1241,7 @@
             <div class="modal-body">
                 <div class="how-to-step">
                     <h3>🎥 Watch & Guess</h3>
-                    <p>Watch a blurred goal video and guess the scorer. Use context clues like stadium, teammates, and celebration style.</p>
+                    <p>Watch a blurred goal video and guess the scorer.</p>
                 </div>
 
                 <div class="how-to-step">
@@ -1243,5 +1263,6 @@
             </div>
         </div>
     </div>
+
 </body>
 </html>
