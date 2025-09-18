@@ -1256,12 +1256,9 @@
                 document.querySelectorAll('a[href="/contact"]').forEach(link => {
                     link.href = 'contact.html';
                 });
-                // Keep relative favicon path for local
-                favicon.href = 'favicon.png';
-            } else {
-                // Use absolute path for production
-                favicon.href = '/favicon.png';
             }
+            // Use relative favicon path for both local and production
+            favicon.href = 'favicon.png';
         }
 
         // Initialize - auto-load first game
