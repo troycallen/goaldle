@@ -141,7 +141,7 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
             margin-bottom: 15px;
             min-width: 45px;
             width: 45px;
@@ -150,10 +150,14 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .btn:hover:not(:disabled) {
             background: #fdd835;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
         .btn:disabled {
@@ -162,12 +166,17 @@
         }
 
         .btn.give-up {
-            background: #e53e3e;
-            border-color: #c53030;
+            background: #ff4757;
+            border: 2px solid #ff3742;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .btn.give-up:hover:not(:disabled) {
-            background: #c53030;
+            background: #ff3742;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
         .status {
@@ -484,12 +493,15 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background: #2d3748;
+            background: #2d2d2d;
             min-width: 200px;
-            border: 2px solid #4a5568;
+            border: 2px solid #ffeb3b;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             z-index: 20;
             top: 50px;
             left: 0;
+            overflow: hidden;
         }
 
         .dropdown-content.show {
@@ -500,11 +512,13 @@
             padding: 12px 16px;
             color: #ffffff;
             cursor: pointer;
-            border-bottom: 1px solid #4a5568;
+            border-bottom: 1px solid rgba(255, 235, 59, 0.2);
+            transition: all 0.2s ease;
         }
 
         .dropdown-item:hover {
-            background: #4a5568;
+            background: rgba(255, 235, 59, 0.1);
+            color: #ffeb3b;
         }
 
         .dropdown-item:last-child {
@@ -647,9 +661,9 @@
         <div class="header">
             <div class="header-content">
                 <div class="nav-links">
-                    <a href="/" style="display: inline-flex; align-items: center; background: #191919; padding: 2px 8px; border-radius: 4px; border: 2px solid #ffeb3b; font-size: 1.6rem; text-decoration: none; color: #ffeb3b;">
+                    <a href="/" style="display: inline-flex; align-items: center; background: #191919; padding: 2px 8px; border-radius: 4px; border: 2px solid #ffeb3b; font-size: 1.6rem; text-decoration: none; color: #ffeb3b; transform: translateY(2px);">
                         <img src="favicon.png" alt="⚽" style="width: 28px; height: 28px; margin-right: 6px;">
-                        <span>Goaldle</span>
+                        <span style="transform: translateY(-2px);">Goaldle</span>
                     </a>
                     <span class="nav-separator">|</span>
                     <a href="#" class="nav-link">How to Play</a>
