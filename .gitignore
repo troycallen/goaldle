@@ -75,7 +75,6 @@ cv-api/goals/blurred/
 **/datasets/
 **/training_data/
 **/football_dataset/
-**/data/
 runs/
 wandb/
 *.weights
