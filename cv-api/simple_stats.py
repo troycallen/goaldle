@@ -11,7 +11,9 @@ from typing import Dict, List, Optional
 class SimpleStatsManager:
     """Simple stats manager that tracks personal game statistics"""
     
-    def __init__(self, stats_file: str = "data/player_stats.json"):
+    def __init__(self, stats_file: str = None):
+        if stats_file is None:
+            stats_file = os.path.join(os.path.dirname(__file__), "data/player_stats.json")
         self.stats_file = stats_file
         os.makedirs(os.path.dirname(stats_file), exist_ok=True)
         self.stats = self._load_stats()

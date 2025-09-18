@@ -5,10 +5,15 @@ from typing import Dict, List, Any, Optional
 import random
 
 class VideoManager:
-    def __init__(self, goals_db_path: str = "data/goals_db.json", goals_dir: str = "goals"):
+    def __init__(self, goals_db_path: str = None, goals_dir: str = None):
+        if goals_db_path is None:
+            goals_db_path = os.path.join(os.path.dirname(__file__), "data/goals_db.json")
+        if goals_dir is None:
+            goals_dir = os.path.join(os.path.dirname(__file__), "goals")
+
         self.goals_db_path = goals_db_path
         self.goals_dir = goals_dir
-        self.blurred_dir = "goals/blurred"
+        self.blurred_dir = os.path.join(os.path.dirname(__file__), "goals/blurred")
         
         # Create blurred directory if it doesn't exist
         os.makedirs(self.blurred_dir, exist_ok=True)
