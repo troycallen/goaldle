@@ -202,7 +202,7 @@
             <div class="header-content">
                 <div class="nav-links">
                     <a href="/" style="display: inline-flex; align-items: center; background: #191919; padding: 2px 8px; border-radius: 4px; border: 2px solid #ffeb3b; font-size: 1.6rem; text-decoration: none; color: #ffeb3b; transform: translateY(2px);">
-                        <img src="favicon.png" alt="⚽" style="width: 28px; height: 28px; margin-right: 6px;">
+                        <img src="favicon.png" alt="⚽" style="width: 28px; height: 28px; margin-right: 6px;" id="header-favicon">
                         <span style="transform: translateY(-2px);">Goaldle</span>
                     </a>
                     <span class="nav-separator">|</span>
@@ -255,6 +255,9 @@
         // Fix navigation links for both local and production
         function fixNavigationLinks() {
             const isLocal = window.location.protocol === 'file:';
+            const favicon = document.getElementById('favicon');
+            const headerFavicon = document.getElementById('header-favicon');
+
             if (isLocal) {
                 // Update links for local file testing
                 document.querySelectorAll('a[href="/"]').forEach(link => {
@@ -267,10 +270,12 @@
                     link.href = 'contact.html';
                 });
                 // Keep relative favicon path for local
-                document.getElementById('favicon').href = 'favicon.png';
+                favicon.href = 'favicon.png';
+                headerFavicon.src = 'favicon.png';
             } else {
-                // Use cv-api/ prefix for production
-                document.getElementById('favicon').href = 'cv-api/favicon.png';
+                // Use relative path for production
+                favicon.href = './favicon.png';
+                headerFavicon.src = './favicon.png';
             }
         }
 
