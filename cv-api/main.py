@@ -386,6 +386,11 @@ async def serve_contact():
     with open("contact.html", "r") as f:
         return f.read()
 
+@app.get("/favicon.png")
+async def serve_favicon():
+    from fastapi.responses import FileResponse
+    return FileResponse("favicon.png", media_type="image/png")
+
 
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
