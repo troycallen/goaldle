@@ -14,7 +14,6 @@ def process_video_file(video_path, output_path):
     print(f"Processing {video_path}...")
     
     try:
-        # Read the video file
         with open(video_path, 'rb') as f:
             video_data = f.read()
         

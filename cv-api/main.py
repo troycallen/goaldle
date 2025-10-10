@@ -31,14 +31,13 @@ app.mount("/static", StaticFiles(directory="."), name="static")
 
 class HybridGoaldleCV:
     def __init__(self):
-        # Use medium model for better accuracy (you can switch back to 'yolov8n-seg.pt' if too slow)
-        self.yolo = YOLO('yolov8n-seg.pt')  # Use smaller model to avoid GitHub file size limits  
+        self.yolo = YOLO('yolov8n-seg.pt')  
         self.tracks = {}
         self.next_id = 0
-        self.max_disappeared = 30  # Your good parameter
-        self.min_confidence = 0.3  # Your parameter - keeps more detections
-        self.max_distance = 150    # Your parameter - more lenient matching
-        self.min_iou = 0.1        # Your parameter
+        self.max_disappeared = 30  
+        self.min_confidence = 0.3  
+        self.max_distance = 150    
+        self.min_iou = 0.1        
         
     def get_simple_features(self, bbox, mask, frame):
         """Simplified feature extraction - faster than full histogram"""
@@ -71,12 +70,12 @@ class HybridGoaldleCV:
                            (det_features['centroid'][1] - track_features['centroid'][1])**2)
         
         if cent_dist > self.max_distance:
-            return 0  # Too far apart
+            return 0  
         
         # IoU check
         iou = self.iou(det_features['bbox'], track_features['bbox'])
         if iou < self.min_iou:
-            return 0  # Not enough overlap
+            return 0  
         
         # Area similarity
         area_ratio = min(det_features['area'], track_features['area']) / max(det_features['area'], track_features['area'])
@@ -87,10 +86,10 @@ class HybridGoaldleCV:
         
         # Combined score
         similarity = (
-            (1 / (1 + cent_dist/50)) * 0.5 +  # Distance (most important)
-            iou * 0.3 +                        # Overlap
-            area_ratio * 0.1 +                 # Size consistency
-            color_sim * 0.1                    # Color consistency
+            (1 / (1 + cent_dist/50)) * 0.5 + 
+            iou * 0.3 +                       
+            area_ratio * 0.1 +                
+            color_sim * 0.1                   
         )
         
         return similarity
@@ -108,7 +107,7 @@ class HybridGoaldleCV:
                     
                     # Basic size filtering
                     bbox_area = (x2 - x1) * (y2 - y1)
-                    if bbox_area > 500:  # Minimum reasonable size
+                    if bbox_area > 500:  
                         mask_data = mask.data[0].cpu().numpy()
                         features = self.get_simple_features((x1, y1, x2, y2), mask_data, frame)
                         detections.append((x1, y1, x2, y2, conf, mask_data, features))
@@ -153,7 +152,7 @@ class HybridGoaldleCV:
         assigned_tracks = set()
         
         for row, col in zip(row_indices, col_indices):
-            if similarity_matrix[row, col] > 0.2:  # Minimum threshold
+            if similarity_matrix[row, col] > 0.2:  
                 det = detections[row]
                 track_id = track_ids[col]
                 x1, y1, x2, y2, conf, mask, features = det
@@ -330,11 +329,9 @@ class HybridGoaldleCV:
             cap.release()
             out.release()
             
-            # Read result
             with open(output_path, 'rb') as f:
                 result_bytes = f.read()
             
-            # Cleanup
             os.unlink(temp_path)
             os.unlink(output_path)
             
