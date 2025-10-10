@@ -87,18 +87,3 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 # Training will automatically use GPU if available
 ```
-
-## Experiment Tracking
-
-Optional Weights & Biases integration:
-```python
-trainer = ModelTrainer(config, use_wandb=True)
-```
-
-## Tips for Better Performance
-
-1. **Data Quality**: Ensure annotations are accurate
-2. **Augmentation**: Use appropriate data augmentation
-3. **Class Balance**: Balance positive/negative samples
-4. **Hyperparameters**: Tune learning rate and batch size
-5. **Model Size**: Start with YOLOv8n, scale up if needed
