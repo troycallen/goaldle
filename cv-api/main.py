@@ -388,6 +388,16 @@ async def serve_favicon():
     from fastapi.responses import FileResponse
     return FileResponse("favicon.png", media_type="image/png")
 
+@app.get("/sitemap.xml")
+async def serve_sitemap():
+    from fastapi.responses import FileResponse
+    return FileResponse("sitemap.xml", media_type="application/xml")
+
+@app.get("/robots.txt")
+async def serve_robots():
+    from fastapi.responses import FileResponse
+    return FileResponse("robots.txt", media_type="text/plain")
+
 
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
