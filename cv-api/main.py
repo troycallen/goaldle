@@ -388,6 +388,11 @@ async def serve_favicon():
     from fastapi.responses import FileResponse
     return FileResponse("favicon.png", media_type="image/png")
 
+@app.get("/favicon.ico")
+async def serve_favicon_ico():
+    from fastapi.responses import FileResponse
+    return FileResponse("favicon.png", media_type="image/png")
+
 @app.get("/sitemap.xml")
 async def serve_sitemap():
     from fastapi.responses import FileResponse
