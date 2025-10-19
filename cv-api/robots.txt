@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://goaldle.com/sitemap.xml
