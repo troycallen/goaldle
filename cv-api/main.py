@@ -398,6 +398,11 @@ async def serve_robots():
     from fastapi.responses import FileResponse
     return FileResponse("robots.txt", media_type="text/plain")
 
+@app.get("/googleb088480d1e6dc59e.html")
+async def serve_google_verification():
+    from fastapi.responses import FileResponse
+    return FileResponse("googleb088480d1e6dc59e.html", media_type="text/html")
+
 
 @app.post("/process-video")
 async def process_video(file: UploadFile = File(...)):
