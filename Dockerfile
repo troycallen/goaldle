@@ -50,8 +50,11 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
+# Set working directory to cv-api
+WORKDIR /app/cv-api
+
 # Expose port
 EXPOSE 8001
 
 # Start command
-CMD ["sh", "-c", "cd cv-api && python main.py"]
+CMD ["python", "main.py"]
