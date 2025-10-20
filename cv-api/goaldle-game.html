@@ -148,24 +148,17 @@
         .timer-container {
             text-align: center;
             margin: 20px 0;
-            padding: 12px;
-            background: rgba(255, 235, 59, 0.1);
-            border: 2px solid #ffeb3b;
-            border-radius: 8px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .timer-text {
-            color: #e2e8f0;
-            font-size: 1.1rem;
-            font-weight: 600;
+            color: #a0aec0;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
         .timer-value {
             color: #ffeb3b;
-            font-weight: 700;
+            font-weight: 600;
         }
         
         
@@ -177,14 +170,16 @@
         }
         
         .video-section {
-            padding: 5px 25px 0px 25px;
+            padding: 0;
             margin-bottom: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .game-section {
-            padding: 0px 25px 25px 25px;
+            padding: 0px 20px 25px 20px;
             margin-bottom: 0px;
-            margin-top: -40px;
             position: relative;
             min-height: 600px;
         }
@@ -213,21 +208,18 @@
             background: #ffeb3b;
             color: #191919;
             border: 2px solid #fdd835;
-            padding: 8px 12px;
-            font-size: 18px;
+            padding: 10px 18px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-bottom: 15px;
-            min-width: 45px;
-            width: 45px;
-            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            white-space: nowrap;
         }
 
         .btn:hover:not(:disabled) {
@@ -275,10 +267,8 @@
         }
         
         video {
-            width: 100%;
-            max-width: 900px;
-            height: auto;
-            aspect-ratio: 16/9;
+            width: 900px;
+            height: 506px;
             margin: 0 auto;
             display: block;
             background: #000;
@@ -286,35 +276,69 @@
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
+
+        @media (max-width: 920px) {
+            video {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16/9;
+            }
+        }
         
         .video-controls {
+            position: relative;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            max-width: 1100px;
-            margin-left: auto;
-            margin-right: auto;
+            width: 900px;
+            margin: 0 auto 15px auto;
+            padding: 0;
+            pointer-events: auto;
         }
-        
+
+        @media (max-width: 920px) {
+            .video-controls {
+                width: 100%;
+                padding: 0 10px;
+            }
+        }
+
+        .video-controls > * {
+            pointer-events: auto;
+        }
+
         .video-controls-left {
             display: flex;
             gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .video-controls-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
             flex: 1;
         }
-        
-        
+
         .video-controls-right {
             display: flex;
             gap: 10px;
-            flex: 1;
-            justify-content: flex-end;
+            flex: 0 0 auto;
+        }
+
+        #videoDisplay {
+            position: relative;
         }
         
         #gameControls {
             position: relative;
-            max-width: 500px;
-            margin: 0 auto 15px auto;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
         }
         
         .guess-input-label {
@@ -379,21 +403,21 @@
         }
         
         .guess-cell .arrow {
-            font-size: 20px;
-            margin-left: 6px;
+            font-size: 14px;
+            margin-left: 4px;
             font-weight: bold;
             color: #ffffff;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
-        
+
         .guess-cell.partial .arrow {
             color: #ffffff;
-            font-size: 22px;
+            font-size: 14px;
         }
-        
+
         .guess-cell.none .arrow {
             color: #ffffff;
-            font-size: 22px;
+            font-size: 14px;
         }
         
         .guess-cell.exact {
@@ -767,27 +791,26 @@
             </div>
         </div>
 
-        <!-- Timer below header -->
-        <div class="timer-container">
-            <span class="timer-text">Next challenge in <span class="timer-value" id="timerDisplay">--:--:--</span></span>
-        </div>
-        
         <div class="game-container">
             <!-- Video Section -->
             <div class="video-section">
                 <div id="videoStatus" class="status hidden"></div>
-                
+
+                <!-- Timer and Buttons on same line -->
+                <div class="video-controls">
+                    <div class="video-controls-left">
+                        <button id="giveUpBtn" class="btn give-up">Give Up</button>
+                    </div>
+                    <div class="video-controls-center">
+                        <span class="timer-text">Next challenge in <span class="timer-value" id="timerDisplay">--:--:--</span></span>
+                    </div>
+                    <div class="video-controls-right">
+                        <button id="restartBtn" class="btn">Restart</button>
+                    </div>
+                </div>
+
                 <div id="videoDisplay" style="margin-top: 0.5rem;">
                     <video id="gameVideo" controls></video>
-
-                    <div class="video-controls">
-                        <div class="video-controls-left">
-                        </div>
-                        <div class="video-controls-right">
-                            <button id="giveUpBtn" class="btn give-up">❌</button>
-                            <button id="restartBtn" class="btn">🔄</button>
-                        </div>
-                    </div>
                 </div>
                 
                 
@@ -798,7 +821,6 @@
                 
                 
                 <div id="gameControls" class="hidden">
-                    <label class="guess-input-label">Who scored this goal?</label>
                     <input type="text" id="playerGuess" class="guess-input" placeholder="e.g. Didier Drogba" autocomplete="off">
                     <div id="suggestions" class="suggestions-list hidden"></div>
                 </div>
@@ -1105,17 +1127,17 @@
                         // Debug logging
                         console.log(`Column ${index}: attribute=${comp.attribute}, status=${comp.status}, hint=${comp.hint}, value=${comp.guess_value}`);
                         
-                        // Check if this is the age column (should be index 3: Name, Team, Position, Country, Age, Height)
-                        if (comp.attribute === 'age' && comp.status !== 'exact') {
-                            // Add arrow for age comparisons
+                        // Check if this is the age or height column
+                        if ((comp.attribute === 'age' || comp.attribute === 'height') && comp.status !== 'exact') {
+                            // Add arrow for age/height comparisons
                             let arrow = '';
-                            if (comp.hint && comp.hint.includes('higher')) {
-                                arrow = ' ⬆️';
-                            } else if (comp.hint && comp.hint.includes('lower')) {
-                                arrow = ' ⬇️';
+                            if (comp.hint && (comp.hint.includes('higher') || comp.hint.includes('taller'))) {
+                                arrow = ' ↑';
+                            } else if (comp.hint && (comp.hint.includes('lower') || comp.hint.includes('shorter'))) {
+                                arrow = ' ↓';
                             }
                             cells[index].innerHTML = `${comp.guess_value}<span class="arrow">${arrow}</span>`;
-                            console.log(`Added arrow: ${arrow} for age ${comp.guess_value}`);
+                            console.log(`Added arrow: ${arrow} for ${comp.attribute} ${comp.guess_value}`);
                         } else {
                             cells[index].textContent = comp.guess_value;
                         }
