@@ -92,7 +92,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -119,7 +119,7 @@
             text-align: center;
             justify-self: center;
         }
-        
+
         .nav-links {
             display: flex;
             gap: 15px;
@@ -131,7 +131,7 @@
             font-weight: 300;
             user-select: none;
         }
-        
+
         .nav-link {
             color: #a0aec0;
             text-decoration: none;
@@ -139,10 +139,33 @@
             font-size: 1.1rem;
             cursor: pointer;
         }
-        
+
         .nav-link:hover {
             color: #ffffff;
             text-decoration: underline;
+        }
+
+        .timer-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 12px;
+            background: rgba(255, 235, 59, 0.1);
+            border: 2px solid #ffeb3b;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .timer-text {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .timer-value {
+            color: #ffeb3b;
+            font-weight: 700;
         }
         
         
@@ -253,12 +276,15 @@
         
         video {
             width: 100%;
-            max-width: 1100px;
-            height: 600px;
+            max-width: 900px;
+            height: auto;
+            aspect-ratio: 16/9;
             margin: 0 auto;
             display: block;
             background: #000;
             object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         
         .video-controls {
@@ -291,19 +317,30 @@
             margin: 0 auto 15px auto;
         }
         
+        .guess-input-label {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+        }
+
         .guess-input {
             width: 100%;
-            padding: 12px;
+            max-width: 600px;
+            padding: 14px 18px;
             background: #1a202c;
-            border: 2px solid #ffeb3b;
+            border: 2px solid #2d3748;
             color: #ffffff;
             font-size: 16px;
-            margin: 0;
+            margin: 0 auto;
             display: block;
+            border-radius: 8px;
+            transition: border-color 0.2s;
         }
 
         .guess-input::placeholder {
-            color: #a0aec0;
+            color: #4a5568;
         }
 
         .guess-input:focus {
@@ -729,6 +766,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Timer below header -->
+        <div class="timer-container">
+            <span class="timer-text">Next challenge in <span class="timer-value" id="timerDisplay">--:--:--</span></span>
+        </div>
         
         <div class="game-container">
             <!-- Video Section -->
@@ -737,20 +779,9 @@
                 
                 <div id="videoDisplay" style="margin-top: 0.5rem;">
                     <video id="gameVideo" controls></video>
+
                     <div class="video-controls">
                         <div class="video-controls-left">
-                            <div class="dropdown">
-                                <button id="dailyChallengeBtn" class="btn">📅</button>
-                                <div id="dailyDropdown" class="dropdown-content">
-                                    <div class="dropdown-item current" data-goal-id="1" data-date="08/02/2025">08/02/2025</div>
-                                    <div class="dropdown-item" data-goal-id="2" data-date="08/01/2025">08/01/2025</div>
-                                    <div class="dropdown-item" data-goal-id="3" data-date="07/31/2025">07/31/2025</div>
-                                    <div class="dropdown-item" data-goal-id="4" data-date="07/30/2025">07/30/2025</div>
-                                    <div class="dropdown-item" data-goal-id="5" data-date="07/29/2025">07/29/2025</div>
-                                    <div class="dropdown-item" data-goal-id="6" data-date="07/28/2025">07/28/2025</div>
-                                    <div class="dropdown-item" data-goal-id="1" data-date="07/27/2025">07/27/2025</div>
-                                </div>
-                            </div>
                         </div>
                         <div class="video-controls-right">
                             <button id="giveUpBtn" class="btn give-up">❌</button>
@@ -767,7 +798,8 @@
                 
                 
                 <div id="gameControls" class="hidden">
-                    <input type="text" id="playerGuess" class="guess-input" placeholder="Enter player name..." autocomplete="off">
+                    <label class="guess-input-label">Who scored this goal?</label>
+                    <input type="text" id="playerGuess" class="guess-input" placeholder="e.g. Didier Drogba" autocomplete="off">
                     <div id="suggestions" class="suggestions-list hidden"></div>
                 </div>
                 
@@ -864,6 +896,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 40px 20px 20px; border-top: 1px solid #2d3748; margin-top: 60px;">
+            <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 15px;">
+                <a href="#" class="nav-link" style="color: #a0aec0; text-decoration: none; font-size: 1rem;">How to Play</a>
+                <a href="/faq" class="nav-link" style="color: #a0aec0; text-decoration: none; font-size: 1rem;">FAQ</a>
+                <a href="/contact" class="nav-link" style="color: #a0aec0; text-decoration: none; font-size: 1rem;">Contact</a>
+            </div>
+            <p style="color: #4a5568; font-size: 0.9rem; margin: 0;">goaldle — 2025</p>
+        </footer>
     </div>
 
     <script>
@@ -877,8 +919,6 @@
         const suggestions = document.getElementById('suggestions');
         const restartBtn = document.getElementById('restartBtn');
         const giveUpBtn = document.getElementById('giveUpBtn');
-        const dailyChallengeBtn = document.getElementById('dailyChallengeBtn');
-        const dailyDropdown = document.getElementById('dailyDropdown');
         const guessesContainer = document.getElementById('guessesContainer');
         const guesses = document.getElementById('guesses');
         const winMessage = document.getElementById('winMessage');
@@ -1184,53 +1224,6 @@
             }
         }
 
-        // Daily challenge dropdown functionality
-        dailyChallengeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dailyDropdown.classList.toggle('show');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!dailyChallengeBtn.contains(e.target) && !dailyDropdown.contains(e.target)) {
-                dailyDropdown.classList.remove('show');
-            }
-        });
-
-        // Handle daily challenge selection
-        dailyDropdown.addEventListener('click', (e) => {
-            if (e.target.classList.contains('dropdown-item')) {
-                const selectedDay = e.target.dataset.day;
-                
-                // Update current selection
-                document.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('current');
-                });
-                e.target.classList.add('current');
-                
-                // Close dropdown
-                dailyDropdown.classList.remove('show');
-                
-                // Load challenge for selected day
-                loadDailyChallenge(selectedDay);
-            }
-        });
-
-        // Load daily challenge function
-        async function loadDailyChallenge(day) {
-            try {
-                showStatus(`Loading ${day === 'today' ? "today's" : day} challenge...`, 'loading');
-                
-                // For now, just start a new random game
-                // In production, you'd fetch the specific daily challenge
-                await startNewGame();
-                
-                hideStatus();
-            } catch (error) {
-                showStatus(`Failed to load challenge: ${error.message}`, 'error');
-            }
-        }
-
         // Button event listeners
         restartBtn.addEventListener('click', startNewGame);
         giveUpBtn.addEventListener('click', giveUp);
@@ -1314,12 +1307,28 @@
 
             // Set favicon paths - different for local vs production
             if (isLocal) {
-                favicon.href = 'favicon.png';
-                headerFavicon.src = 'favicon.png';
+                if (favicon) favicon.href = 'favicon.png';
+                if (headerFavicon) headerFavicon.src = 'favicon.png';
             } else {
-                favicon.href = '/favicon.png';
-                headerFavicon.src = '/favicon.png';
+                if (favicon) favicon.href = '/favicon.png';
+                if (headerFavicon) headerFavicon.src = '/favicon.png';
             }
+        }
+
+        // Update countdown timer for next daily challenge
+        function updateDailyTimer() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setHours(24, 0, 0, 0); // Midnight tonight (start of tomorrow)
+
+            const diff = tomorrow - now;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         // Initialize - auto-load first game
@@ -1328,8 +1337,12 @@
             await loadPlayers();
             await startNewGame();
             initializeModal(); // Initialize modal functionality
+
+            // Start countdown timer
+            updateDailyTimer();
+            setInterval(updateDailyTimer, 1000); // Update every second
         }
-        
+
         initialize();
     </script>
 
