@@ -1,5 +1,0 @@
-[phases.setup]
-aptPkgs = ["libgl1", "libglib2.0-0", "libgomp1", "libsm6", "libxext6", "libxrender1"]
-
-[start]
-cmd = "cd cv-api && python main.py"
