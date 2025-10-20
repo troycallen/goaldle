@@ -796,16 +796,16 @@
             <div class="video-section">
                 <div id="videoStatus" class="status hidden"></div>
 
-                <!-- Timer and Buttons on same line -->
-                <div class="video-controls">
-                    <div class="video-controls-left">
-                        <button id="giveUpBtn" class="btn give-up">Give Up</button>
-                    </div>
-                    <div class="video-controls-center">
+                <!-- Timer and Give Up -->
+                <div style="display: flex; justify-content: space-between; align-items: center; max-width: 900px; width: 100%; margin-bottom: 15px;">
+                    <div style="flex: 1;"></div>
+                    <div style="flex: 1; text-align: center;">
                         <span class="timer-text">Next challenge in <span class="timer-value" id="timerDisplay">--:--:--</span></span>
                     </div>
-                    <div class="video-controls-right">
-                        <button id="restartBtn" class="btn">Restart</button>
+                    <div style="flex: 1; text-align: right;">
+                        <button id="giveUpBtn" style="background: transparent; border: none; color: #ff4757; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px;">
+                            Give up ✕
+                        </button>
                     </div>
                 </div>
 
@@ -858,7 +858,7 @@
                 <div id="guessesContainer" class="guesses-container">
                     <div class="attribute-headers">
                         <div class="attribute-header">Name</div>
-                        <div class="attribute-header">Team</div>
+                        <div class="attribute-header">Club</div>
                         <div class="attribute-header">Position</div>
                         <div class="attribute-header">Country</div>
                         <div class="attribute-header">Age</div>
@@ -939,7 +939,6 @@
         const gameControls = document.getElementById('gameControls');
         const playerGuess = document.getElementById('playerGuess');
         const suggestions = document.getElementById('suggestions');
-        const restartBtn = document.getElementById('restartBtn');
         const giveUpBtn = document.getElementById('giveUpBtn');
         const guessesContainer = document.getElementById('guessesContainer');
         const guesses = document.getElementById('guesses');
@@ -972,11 +971,9 @@
             }
         }
 
-        // Start/restart game function
+        // Start game function
         async function startNewGame() {
             showStatus('Starting new game...', 'loading');
-            restartBtn.disabled = true;
-            giveUpBtn.disabled = true;
 
             try {
                 const response = await fetch(`${API_BASE}/game/start-with-video`, {
@@ -1007,9 +1004,6 @@
                 }
             } catch (error) {
                 showStatus(`Failed to start game: ${error.message}`, 'error');
-            } finally {
-                restartBtn.disabled = false;
-                giveUpBtn.disabled = false;
             }
         }
 
@@ -1253,8 +1247,7 @@
             }
         }
 
-        // Button event listeners
-        restartBtn.addEventListener('click', startNewGame);
+        // Button event listener
         giveUpBtn.addEventListener('click', giveUp);
 
         // UI helper functions
