@@ -337,8 +337,8 @@ class HybridGoaldleCV:
 
             output_path = temp_path.replace('.mp4', '_blurred.mp4')
 
-            # Safer codec fallback than H264 in many OpenCV builds
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            # Use H264 codec for browser compatibility
+            fourcc = cv2.VideoWriter_fourcc(*'H264')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             frame_count = 0
