@@ -1,4 +1,4 @@
-# Goaldle CV API - Hybrid Approach (Best of Both)
+# Goaldle CV API - Hybrid Approach (Best of Both) [Upgraded]
 import subprocess
 import sys
 import os
@@ -19,6 +19,7 @@ from datetime import datetime
 from ultralytics import YOLO
 from collections import defaultdict
 from scipy.optimize import linear_sum_assignment
+import torch  # NEW: for device + half
 from game_logic import GoaldleGame
 from simple_stats import SimpleStatsManager
 
@@ -31,32 +32,53 @@ app.mount("/static", StaticFiles(directory="."), name="static")
 # Mount videos directory for fast streaming
 app.mount("/videos", StaticFiles(directory="goals"), name="videos")
 
+
 class HybridGoaldleCV:
     def __init__(self):
-        self.yolo = YOLO('yolov8n-seg.pt')  
+        # Slightly larger/better model; still fast
+        self.yolo = YOLO('yolov8s-seg.pt')
+        self.device = 0 if torch.cuda.is_available() else "cpu"
+        self.use_half = torch.cuda.is_available()
+
         self.tracks = {}
         self.next_id = 0
-        self.max_disappeared = 30  
-        self.min_confidence = 0.3  
-        self.max_distance = 150    
-        self.min_iou = 0.1        
-        
+        self.max_disappeared = 30
+        self.min_confidence = 0.30
+        # dynamic thresholds will be set per-frame based on resolution
+        self.max_distance = 150
+        self.min_iou = 0.10
+
+    # ---------- Utility & features ----------
+
+    def _set_dynamic_thresholds(self, frame_shape):
+        """Scale distance/IoU thresholds to video resolution."""
+        h, w = frame_shape[:2]
+        diag = (h ** 2 + w ** 2) ** 0.5
+        # ~5% of image diagonal for assignment distance
+        self.max_distance = 0.05 * diag
+        # allow lower IoU on wide shots
+        self.min_iou = 0.05
+
     def get_simple_features(self, bbox, mask, frame):
-        """Simplified feature extraction - faster than full histogram"""
+        """Feature extraction using ONLY the mask (avoids grass contamination)."""
         x1, y1, x2, y2 = bbox
-        
-        # Basic features
+
         centroid = ((x1 + x2) // 2, (y1 + y2) // 2)
-        area = (x2 - x1) * (y2 - y1)
-        aspect_ratio = (x2 - x1) / max(y2 - y1, 1)
-        
-        # Simple color feature - just average color in bbox
+        area = max(1, (x2 - x1) * (y2 - y1))
+        aspect_ratio = (x2 - x1) / max(1, (y2 - y1))
+
+        # mask is float [0..1] aligned to frame size
+        m = (mask > 0.5).astype(np.uint8)
+
         roi = frame[y1:y2, x1:x2]
-        if roi.size > 0:
-            avg_color = np.mean(roi.reshape(-1, 3), axis=0)
+        m_crop = m[y1:y2, x1:x2]
+        if roi.size > 0 and m_crop.any():
+            # average BGR color inside the player only
+            b, g, r, _ = cv2.mean(roi, mask=m_crop)
+            avg_color = np.array([b, g, r], dtype=np.float32)
         else:
-            avg_color = np.array([0, 0, 0])
-        
+            avg_color = np.array([0, 0, 0], dtype=np.float32)
+
         return {
             'centroid': centroid,
             'area': area,
@@ -64,299 +86,309 @@ class HybridGoaldleCV:
             'avg_color': avg_color,
             'bbox': bbox
         }
-    
-    def calculate_similarity(self, det_features, track_features):
-        """Lightweight similarity calculation"""
-        # Distance check first (early exit)
-        cent_dist = np.sqrt((det_features['centroid'][0] - track_features['centroid'][0])**2 + 
-                           (det_features['centroid'][1] - track_features['centroid'][1])**2)
-        
-        if cent_dist > self.max_distance:
-            return 0  
-        
-        # IoU check
-        iou = self.iou(det_features['bbox'], track_features['bbox'])
-        if iou < self.min_iou:
-            return 0  
-        
-        # Area similarity
-        area_ratio = min(det_features['area'], track_features['area']) / max(det_features['area'], track_features['area'])
-        
-        # Color similarity (simple Euclidean distance)
-        color_dist = np.linalg.norm(det_features['avg_color'] - track_features['avg_color'])
-        color_sim = max(0, 1 - color_dist / 100)  # Normalize to 0-1
-        
-        # Combined score
-        similarity = (
-            (1 / (1 + cent_dist/50)) * 0.5 + 
-            iou * 0.3 +                       
-            area_ratio * 0.1 +                
-            color_sim * 0.1                   
-        )
-        
-        return similarity
-    
-    def detect_and_track(self, frame):
-        # YOLOv8 detection with your parameters
-        results = self.yolo(frame, classes=[0], verbose=False, conf=self.min_confidence)
-        detections = []
-        
-        for result in results:
-            if result.boxes is not None and result.masks is not None:
-                for i, (box, mask) in enumerate(zip(result.boxes, result.masks)):
-                    x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
-                    conf = float(box.conf[0].cpu().numpy())
-                    
-                    # Basic size filtering
-                    bbox_area = (x2 - x1) * (y2 - y1)
-                    if bbox_area > 500:  
-                        mask_data = mask.data[0].cpu().numpy()
-                        features = self.get_simple_features((x1, y1, x2, y2), mask_data, frame)
-                        detections.append((x1, y1, x2, y2, conf, mask_data, features))
-        
-        # Use Hungarian algorithm for assignment (prevents blinking)
-        if len(detections) > 0 and len(self.tracks) > 0:
-            current_tracks = self.assign_with_hungarian(detections)
-        else:
-            # Initialize tracks for first frame or when no existing tracks
-            current_tracks = self.initialize_tracks(detections)
-        
-        # Clean up old tracks
-        self.cleanup_tracks(current_tracks)
-        
-        return current_tracks
-    
-    def assign_with_hungarian(self, detections):
-        """Hungarian algorithm assignment"""
-        track_ids = [tid for tid, track in self.tracks.items() if track['frames'] < self.max_disappeared]
-        
-        if not track_ids:
-            return self.initialize_tracks(detections)
-        
-        # Build similarity matrix
-        similarity_matrix = np.zeros((len(detections), len(track_ids)))
-        
-        for i, det in enumerate(detections):
-            features = det[6]
-            for j, track_id in enumerate(track_ids):
-                similarity = self.calculate_similarity(features, self.tracks[track_id]['features'])
-                similarity_matrix[i, j] = similarity
-        
-        # Hungarian assignment (maximize similarity)
-        if similarity_matrix.size > 0:
-            row_indices, col_indices = linear_sum_assignment(-similarity_matrix)
-        else:
-            row_indices, col_indices = [], []
-        
-        # Process assignments
-        current_tracks = []
-        assigned_detections = set()
-        assigned_tracks = set()
-        
-        for row, col in zip(row_indices, col_indices):
-            if similarity_matrix[row, col] > 0.2:  
-                det = detections[row]
-                track_id = track_ids[col]
-                x1, y1, x2, y2, conf, mask, features = det
-                
-                # Update track
-                self.tracks[track_id]['features'] = features
-                self.tracks[track_id]['frames'] = 0
-                
-                current_tracks.append((x1, y1, x2, y2, track_id, mask))
-                assigned_detections.add(row)
-                assigned_tracks.add(track_id)
-        
-        # Create new tracks for unassigned detections
-        for i, det in enumerate(detections):
-            if i not in assigned_detections:
-                x1, y1, x2, y2, conf, mask, features = det
-                track_id = self.next_id
-                self.next_id += 1
-                
-                self.tracks[track_id] = {
-                    'features': features,
-                    'frames': 0
-                }
-                
-                current_tracks.append((x1, y1, x2, y2, track_id, mask))
-        
-        # Update frames for unassigned tracks
-        for track_id in track_ids:
-            if track_id not in assigned_tracks:
-                self.tracks[track_id]['frames'] += 1
-        
-        return current_tracks
-    
-    def initialize_tracks(self, detections):
-        """Initialize tracks for first frame"""
-        current_tracks = []
-        for det in detections:
-            x1, y1, x2, y2, conf, mask, features = det
-            track_id = self.next_id
-            self.next_id += 1
-            
-            self.tracks[track_id] = {
-                'features': features,
-                'frames': 0
-            }
-            
-            current_tracks.append((x1, y1, x2, y2, track_id, mask))
-        
-        return current_tracks
-    
-    def cleanup_tracks(self, current_tracks):
-        """Remove old tracks"""
-        tracks_to_remove = []
-        for track_id in list(self.tracks.keys()):
-            if self.tracks[track_id]['frames'] > self.max_disappeared:
-                tracks_to_remove.append(track_id)
-        
-        for track_id in tracks_to_remove:
-            del self.tracks[track_id]
-    
+
     def iou(self, bbox1, bbox2):
-        """Your IoU function"""
+        """IoU for xyxy bboxes."""
         x1_1, y1_1, x2_1, y2_1 = bbox1
         x1_2, y1_2, x2_2, y2_2 = bbox2
-        
+
         x1_i = max(x1_1, x1_2)
         y1_i = max(y1_1, y1_2)
         x2_i = min(x2_1, x2_2)
         y2_i = min(y2_1, y2_2)
-        
+
         if x2_i <= x1_i or y2_i <= y1_i:
             return 0.0
-        
+
         intersection = (x2_i - x1_i) * (y2_i - y1_i)
         area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
         area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
         union = area1 + area2 - intersection
-        
-        return intersection / union if union > 0 else 0.0
-    
+        return float(intersection) / float(union) if union > 0 else 0.0
+
+    # ---------- Similarity & Assignment ----------
+
+    def _predicted_centroid(self, track):
+        """Predict next centroid using a tiny velocity model for stability."""
+        c = track['features']['centroid']
+        vx, vy = track.get('vel', (0.0, 0.0))
+        return (c[0] + vx, c[1] + vy)
+
+    def calculate_similarity(self, det_features, track):
+        """Similarity with IoU + distance-to-predicted-center + color + area."""
+        track_features = track['features']
+
+        # predicted center for the track
+        px, py = self._predicted_centroid(track)
+        dx = det_features['centroid'][0] - px
+        dy = det_features['centroid'][1] - py
+        cent_dist = float(np.hypot(dx, dy))
+
+        if cent_dist > self.max_distance:
+            return 0.0
+
+        # IoU check first
+        iou = self.iou(det_features['bbox'], track_features['bbox'])
+        if iou < self.min_iou:
+            return 0.0
+
+        # normalized center-distance similarity (0..1)
+        cx_sim = 1.0 / (1.0 + (cent_dist / (self.max_distance + 1e-6)))
+
+        # area similarity
+        area_ratio = min(det_features['area'], track_features['area']) / max(det_features['area'], track_features['area'])
+
+        # color similarity (gaussian on Euclidean BGR distance)
+        color_dist = float(np.linalg.norm(det_features['avg_color'] - track_features['avg_color']))
+        color_sim = float(np.exp(-(color_dist ** 2) / (2 * (35.0 ** 2))))  # sigma ~35
+
+        # weight IoU & center more; then color; then area
+        return 0.4 * iou + 0.3 * cx_sim + 0.2 * color_sim + 0.1 * area_ratio
+
+    # ---------- Detection, Tracking, Compositing ----------
+
+    def detect_and_track(self, frame):
+        self._set_dynamic_thresholds(frame.shape)
+
+        # Use predict() to pass params explicitly; retina_masks yields full-res masks
+        results = self.yolo.predict(
+            source=frame,
+            classes=[0],                       # person
+            conf=self.min_confidence,
+            iou=0.6,
+            imgsz=max(frame.shape[:2]),
+            device=self.device,
+            half=self.use_half,
+            retina_masks=True,
+            verbose=False
+        )
+
+        detections = []
+        for r in results:
+            if r.boxes is None or r.masks is None:
+                continue
+
+            boxes = r.boxes
+            # masks at original frame size due to retina_masks=True
+            masks = r.masks.data.cpu().numpy()  # (N, H, W)
+
+            for i in range(len(boxes)):
+                x1, y1, x2, y2 = map(int, boxes.xyxy[i].cpu().numpy())
+                conf = float(boxes.conf[i].cpu().numpy())
+                # basic size filtering
+                if (x2 - x1) * (y2 - y1) <= 500:
+                    continue
+
+                mask = masks[i].astype(np.float32)  # [0..1]
+                features = self.get_simple_features((x1, y1, x2, y2), mask, frame)
+                detections.append((x1, y1, x2, y2, conf, mask, features))
+
+        # Assign with Hungarian
+        if detections and self.tracks:
+            current_tracks = self.assign_with_hungarian(detections)
+        else:
+            current_tracks = self.initialize_tracks(detections)
+
+        # Clean old tracks
+        self.cleanup_tracks(current_tracks)
+        return current_tracks
+
+    def assign_with_hungarian(self, detections):
+        track_ids = [tid for tid, t in self.tracks.items() if t['frames'] < self.max_disappeared]
+        if not track_ids:
+            return self.initialize_tracks(detections)
+
+        sim = np.zeros((len(detections), len(track_ids)), dtype=np.float32)
+        for i, det in enumerate(detections):
+            dfeat = det[6]
+            for j, tid in enumerate(track_ids):
+                sim[i, j] = self.calculate_similarity(dfeat, self.tracks[tid])
+
+        if sim.size > 0:
+            rows, cols = linear_sum_assignment(-sim)  # maximize similarity
+        else:
+            rows, cols = [], []
+
+        current_tracks = []
+        assigned_dets = set()
+        assigned_tids = set()
+
+        for r_i, c_i in zip(rows, cols):
+            if sim[r_i, c_i] > 0.35:  # slightly stricter acceptance
+                det = detections[r_i]
+                tid = track_ids[c_i]
+                x1, y1, x2, y2, conf, mask, features = det
+
+                # update velocity (EMA)
+                prev_c = self.tracks[tid]['features']['centroid']
+                new_c = features['centroid']
+                vel = (new_c[0] - prev_c[0], new_c[1] - prev_c[1])
+                old_vx, old_vy = self.tracks[tid].get('vel', (0.0, 0.0))
+                self.tracks[tid]['vel'] = (0.7 * old_vx + 0.3 * vel[0], 0.7 * old_vy + 0.3 * vel[1])
+
+                # update features/frame age
+                self.tracks[tid]['features'] = features
+                self.tracks[tid]['frames'] = 0
+
+                current_tracks.append((x1, y1, x2, y2, tid, mask))
+                assigned_dets.add(r_i)
+                assigned_tids.add(tid)
+
+        # create new tracks for unassigned detections
+        for i, det in enumerate(detections):
+            if i in assigned_dets:
+                continue
+            x1, y1, x2, y2, conf, mask, features = det
+            tid = self.next_id
+            self.next_id += 1
+            self.tracks[tid] = {'features': features, 'frames': 0, 'vel': (0.0, 0.0)}
+            current_tracks.append((x1, y1, x2, y2, tid, mask))
+
+        # age unassigned tracks
+        for tid in track_ids:
+            if tid not in assigned_tids:
+                self.tracks[tid]['frames'] += 1
+
+        return current_tracks
+
+    def initialize_tracks(self, detections):
+        current_tracks = []
+        for det in detections:
+            x1, y1, x2, y2, conf, mask, features = det
+            tid = self.next_id
+            self.next_id += 1
+            self.tracks[tid] = {'features': features, 'frames': 0, 'vel': (0.0, 0.0)}
+            current_tracks.append((x1, y1, x2, y2, tid, mask))
+        return current_tracks
+
+    def cleanup_tracks(self, current_tracks):
+        to_del = []
+        for tid in list(self.tracks.keys()):
+            if self.tracks[tid]['frames'] > self.max_disappeared:
+                to_del.append(tid)
+        for tid in to_del:
+            del self.tracks[tid]
+
     def blur_players(self, frame, tracks):
-        """Smooth blurring with feathered edges instead of hard silhouettes"""
+        """
+        Colorized silhouette compositor.
+        Each tracked player gets a unique tint instead of pure black blur.
+        """
         result = frame.copy()
         h, w = frame.shape[:2]
-        
-        # Create a combined mask for all tracked objects
-        combined_mask = np.zeros((h, w), dtype=np.float32)
-        
-        for x1, y1, x2, y2, track_id, mask in tracks:
-            # Resize mask to frame size if needed
-            if mask.shape != (h, w):
-                mask_resized = cv2.resize(mask, (w, h), interpolation=cv2.INTER_LINEAR)
-            else:
-                mask_resized = mask.copy()
-            
-            # Normalize mask to 0-1 range
-            mask_norm = mask_resized.astype(np.float32)
-            if mask_norm.max() > 1.0:
-                mask_norm = mask_norm / 255.0
-            
-            # Moderately expand the mask to fill gaps
-            expand_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-            mask_expanded = cv2.dilate(mask_norm, expand_kernel, iterations=2)
-            
-            # Smooth the expanded mask edges
-            mask_smooth = cv2.GaussianBlur(mask_expanded, (25, 25), 8.0)
-            
-            # Apply morphological operations for better body coverage
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
-            mask_smooth = cv2.morphologyEx(mask_smooth, cv2.MORPH_CLOSE, kernel)
-            
-            # Edge feathering for smooth transitions
-            mask_feathered = cv2.GaussianBlur(mask_smooth, (19, 19), 6.0)
-            
-            # Combine with existing mask (take maximum)
-            combined_mask = np.maximum(combined_mask, mask_feathered)
-        
-        if combined_mask.max() > 0:
-            # Create black overlay
-            black_overlay = np.zeros_like(result, dtype=np.uint8)
-            
-            # Create heavily blurred version 
-            blurred_frame = cv2.GaussianBlur(result, (71, 71), 30.0)
-            blurred_frame = cv2.GaussianBlur(blurred_frame, (71, 71), 30.0)  # Double blur
-            
-            # Expand the mask dimensions for 3-channel blending
-            mask_3d = np.expand_dims(combined_mask, axis=2)
-            mask_3d = np.repeat(mask_3d, 3, axis=2)
-            
-            # Blend: 80% black + 20% heavily blurred background
-            masked_area = black_overlay * 0.8 + blurred_frame * 0.2
-            
-            # Apply the masked area to the result
-            result = result * (1 - mask_3d) + masked_area * mask_3d
-            result = result.astype(np.uint8)
-        
+        combined = np.zeros((h, w, 3), dtype=np.float32)
+
+        for x1, y1, x2, y2, tid, mask in tracks:
+            m = mask
+            if m.shape != (h, w):
+                m = cv2.resize(m, (w, h), interpolation=cv2.INTER_LINEAR)
+            m = m.astype(np.float32)
+            if m.max() > 1.0:
+                m /= 255.0
+
+            # feather mask
+            m = cv2.GaussianBlur(m, (21, 21), 6.0)
+
+            # pick a pseudo-random color per track ID
+            rng = np.random.default_rng(seed=tid)
+            color = rng.random(3) * np.array([255, 255, 255])
+            color = color.astype(np.float32)
+
+            # expand mask to 3-channel
+            m3 = np.repeat(m[:, :, None], 3, axis=2)
+
+            # add tinted region
+            combined += (m3 * color)
+
+        # normalize combined mask intensity
+        combined = np.clip(combined, 0, 255)
+
+        # overlay color tint over blurred background
+        blurred_bg = cv2.GaussianBlur(result, (71, 71), 30.0)
+        alpha = 0.5  # how strong the color overlay is
+        overlay = cv2.addWeighted(blurred_bg.astype(np.float32), 1 - alpha, combined, alpha, 0)
+
+        # Blend back into frame using overall silhouette mask (for smooth edges)
+        gray_mask = cv2.cvtColor((combined > 0).astype(np.uint8) * 255, cv2.COLOR_BGR2GRAY)
+        gray_mask = cv2.GaussianBlur(gray_mask, (25, 25), 10.0)
+        gray_mask = gray_mask.astype(np.float32) / 255.0
+        gray_mask3 = np.repeat(gray_mask[:, :, None], 3, axis=2)
+
+        result = (result * (1 - gray_mask3) + overlay * gray_mask3).astype(np.uint8)
         return result
-    
+
+
+    # ---------- Video pipeline ----------
+
     def process_video(self, video_bytes):
         try:
-            # Save video
+            # Save temp video
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as f:
                 f.write(video_bytes)
                 temp_path = f.name
-            
+
             cap = cv2.VideoCapture(temp_path)
             if not cap.isOpened():
                 raise ValueError("Could not open video")
-            
-            fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+            fps = cap.get(cv2.CAP_PROP_FPS) or 30.0  # keep as float
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            
+
             output_path = temp_path.replace('.mp4', '_blurred.mp4')
-            fourcc = cv2.VideoWriter_fourcc(*'H264')
+
+            # Safer codec fallback than H264 in many OpenCV builds
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-            
+
             frame_count = 0
             while True:
                 ret, frame = cap.read()
                 if not ret:
                     break
-                
-                # Process frame
+
                 tracks = self.detect_and_track(frame)
                 processed_frame = self.blur_players(frame, tracks)
                 out.write(processed_frame)
-                
+
                 frame_count += 1
                 if frame_count % 30 == 0:
                     active_tracks = len([t for t in self.tracks.values() if t['frames'] < 5])
                     print(f"Processed {frame_count} frames - Active tracks: {active_tracks}")
-            
+
             cap.release()
             out.release()
-            
+
             with open(output_path, 'rb') as f:
                 result_bytes = f.read()
-            
+
             os.unlink(temp_path)
             os.unlink(output_path)
-            
+
             return {
                 "success": True,
                 "blurred_video": base64.b64encode(result_bytes).decode(),
                 "video_info": {"fps": fps, "width": width, "height": height, "frames": frame_count}
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
+
 
 # Initialize CV, Game, and Stats instances
 import os
 cv = HybridGoaldleCV()
 db_path = os.path.join(os.path.dirname(__file__), "data/players_db.json")
+print(f"Using device: {cv.device}, half: {cv.use_half}")
 print(f"Looking for database at: {db_path}")
 game = GoaldleGame(db_path)
 stats = SimpleStatsManager()
 
+
 # Pydantic models for API
 class GuessRequest(BaseModel):
     player_name: str
+
 
 class GameResult(BaseModel):
     player_name: str
@@ -380,20 +412,24 @@ async def root():
         }
     )
 
+
 @app.get("/game", response_class=HTMLResponse)
 async def serve_game():
     with open("goaldle-game.html", "r", encoding="utf-8") as f:
         return f.read()
+
 
 @app.get("/faq", response_class=HTMLResponse)
 async def serve_faq():
     with open("faq.html", "r", encoding="utf-8") as f:
         return f.read()
 
+
 @app.get("/contact", response_class=HTMLResponse)
 async def serve_contact():
     with open("contact.html", "r", encoding="utf-8") as f:
         return f.read()
+
 
 @app.get("/favicon.png")
 async def serve_favicon():
@@ -406,20 +442,24 @@ async def serve_favicon():
         }
     )
 
+
 @app.get("/favicon.ico")
 async def serve_favicon_ico():
     from fastapi.responses import FileResponse
     return FileResponse("favicon.png", media_type="image/png")
+
 
 @app.get("/sitemap.xml")
 async def serve_sitemap():
     from fastapi.responses import FileResponse
     return FileResponse("sitemap.xml", media_type="application/xml")
 
+
 @app.get("/robots.txt")
 async def serve_robots():
     from fastapi.responses import FileResponse
     return FileResponse("robots.txt", media_type="text/plain")
+
 
 @app.get("/googleb088480d1e6dc59e.html")
 async def serve_google_verification():
@@ -431,10 +471,11 @@ async def serve_google_verification():
 async def process_video(file: UploadFile = File(...)):
     if not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="Must be video file")
-    
+
     contents = await file.read()
     result = cv.process_video(contents)
     return JSONResponse(content=result)
+
 
 @app.post("/reset-tracking")
 async def reset_tracking():
@@ -442,6 +483,7 @@ async def reset_tracking():
     global cv
     cv = HybridGoaldleCV()
     return {"message": "Tracking reset successfully"}
+
 
 # Game endpoints
 @app.post("/game/new")
@@ -452,6 +494,7 @@ async def new_game():
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/game/guess")
 async def make_guess(request: GuessRequest):
@@ -464,6 +507,7 @@ async def make_guess(request: GuessRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/game/state")
 async def get_game_state():
     """Get current game state"""
@@ -472,6 +516,7 @@ async def get_game_state():
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/game/players")
 async def get_players():
@@ -482,6 +527,7 @@ async def get_players():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/game/current-video")
 async def get_current_video():
     """Get the current game's video (blurred version)"""
@@ -489,13 +535,14 @@ async def get_current_video():
         video_data = game.get_current_video()
         if not video_data:
             raise HTTPException(status_code=404, detail="No active game or video not found")
-        
+
         return JSONResponse(content={
             "success": True,
             "video_data": video_data
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/game/video-reveal")
 async def get_video_reveal():
@@ -504,7 +551,7 @@ async def get_video_reveal():
         reveal_data = game.get_video_reveal()
         if not reveal_data:
             raise HTTPException(status_code=404, detail="No active game")
-        
+
         return JSONResponse(content={
             "success": True,
             "reveal_data": reveal_data
@@ -512,19 +559,20 @@ async def get_video_reveal():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/game/start-with-video")
 async def start_game_with_video():
     """Start a new game and get the video"""
     try:
         # Start new game
         game_result = game.start_new_game()
-        
+
         # Get the video for this game
         video_data = game.get_current_video()
-        
+
         if not video_data:
             raise HTTPException(status_code=500, detail="Failed to load video for game")
-        
+
         return JSONResponse(content={
             "success": True,
             "game_state": game_result,
@@ -533,23 +581,24 @@ async def start_game_with_video():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/game/integrate-video")
 async def integrate_video_with_game(file: UploadFile = File(...)):
     """Process video, blur players, and start a new game (legacy endpoint)"""
     try:
         if not file.content_type.startswith("video/"):
             raise HTTPException(status_code=400, detail="Must be video file")
-        
+
         # Process the video
         contents = await file.read()
         video_result = cv.process_video(contents)
-        
+
         if not video_result["success"]:
             raise HTTPException(status_code=500, detail=f"Video processing failed: {video_result['error']}")
-        
+
         # Start a new game
         game_result = game.start_new_game()
-        
+
         return JSONResponse(content={
             "success": True,
             "video_result": {
@@ -562,6 +611,7 @@ async def integrate_video_with_game(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # === SIMPLE STATS ENDPOINTS ===
 
 @app.get("/stats")
@@ -573,6 +623,7 @@ async def get_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/stats/detailed")
 async def get_detailed_stats():
     """Get detailed statistics with history"""
@@ -581,6 +632,7 @@ async def get_detailed_stats():
         return JSONResponse(content=detailed_stats)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/stats/record-game")
 async def record_game(game_result: GameResult):
@@ -596,6 +648,7 @@ async def record_game(game_result: GameResult):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/stats/export")
 async def export_stats():
     """Export stats as formatted text"""
@@ -605,6 +658,7 @@ async def export_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/stats/reset")
 async def reset_stats():
     """Reset all statistics"""
@@ -613,6 +667,7 @@ async def reset_stats():
         return JSONResponse(content={"success": True, "message": "Stats reset"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
