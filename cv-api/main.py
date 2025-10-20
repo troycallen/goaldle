@@ -365,8 +365,18 @@ class GameResult(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
+    from fastapi.responses import Response
     with open("goaldle-game.html", "r") as f:
-        return f.read()
+        content = f.read()
+    return Response(
+        content=content,
+        media_type="text/html",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
 
 @app.get("/game", response_class=HTMLResponse)
 async def serve_game():
@@ -386,7 +396,13 @@ async def serve_contact():
 @app.get("/favicon.png")
 async def serve_favicon():
     from fastapi.responses import FileResponse
-    return FileResponse("favicon.png", media_type="image/png")
+    return FileResponse(
+        "favicon.png",
+        media_type="image/png",
+        headers={
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
 
 @app.get("/favicon.ico")
 async def serve_favicon_ico():
