@@ -42,11 +42,11 @@ class HybridGoaldleCV:
 
         self.tracks = {}
         self.next_id = 0
-        self.max_disappeared = 30
-        self.min_confidence = 0.30
+        self.max_disappeared = 45  # Increased from 30 - keep tracks alive longer
+        self.min_confidence = 0.25  # Lowered from 0.30 - detect players more reliably
         # dynamic thresholds will be set per-frame based on resolution
         self.max_distance = 150
-        self.min_iou = 0.10
+        self.min_iou = 0.05  # Lowered from 0.10 - allow more flexible matching
 
     # ---------- Utility & features ----------
 
@@ -214,17 +214,18 @@ class HybridGoaldleCV:
         assigned_tids = set()
 
         for r_i, c_i in zip(rows, cols):
-            if sim[r_i, c_i] > 0.35:  # slightly stricter acceptance
+            if sim[r_i, c_i] > 0.25:  
                 det = detections[r_i]
                 tid = track_ids[c_i]
                 x1, y1, x2, y2, conf, mask, features = det
 
-                # update velocity (EMA)
+                # update velocity 
                 prev_c = self.tracks[tid]['features']['centroid']
                 new_c = features['centroid']
                 vel = (new_c[0] - prev_c[0], new_c[1] - prev_c[1])
                 old_vx, old_vy = self.tracks[tid].get('vel', (0.0, 0.0))
-                self.tracks[tid]['vel'] = (0.7 * old_vx + 0.3 * vel[0], 0.7 * old_vy + 0.3 * vel[1])
+                
+                self.tracks[tid]['vel'] = (0.8 * old_vx + 0.2 * vel[0], 0.8 * old_vy + 0.2 * vel[1])
 
                 # update features/frame age
                 self.tracks[tid]['features'] = features
