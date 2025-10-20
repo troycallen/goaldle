@@ -964,11 +964,14 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Display video
-                    if (result.video_data.original_video) {
+                    // Display video - now using URL instead of base64
+                    if (result.video_data.video_url) {
+                        gameVideo.src = result.video_data.video_url;
+                    } else if (result.video_data.original_video) {
+                        // Fallback to base64 if URL not available
                         displayVideo(result.video_data.original_video, gameVideo);
                     }
-                    
+
                     // Reset all game state
                     resetGameUI();
                     
@@ -1185,10 +1188,14 @@
             try {
                 const response = await fetch(`${API_BASE}/game/video-reveal`);
                 const result = await response.json();
-                
-                if (result.success && result.reveal_data.videos.original_video) {
-                    // Replace the current video with the original
-                    displayVideo(result.reveal_data.videos.original_video, gameVideo);
+
+                if (result.success) {
+                    // Use URL if available, otherwise fallback to base64
+                    if (result.reveal_data.videos.original_video_url) {
+                        gameVideo.src = result.reveal_data.videos.original_video_url;
+                    } else if (result.reveal_data.videos.original_video) {
+                        displayVideo(result.reveal_data.videos.original_video, gameVideo);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load video reveal:', error);

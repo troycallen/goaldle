@@ -28,6 +28,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="."), name="static")
+# Mount videos directory for fast streaming
+app.mount("/videos", StaticFiles(directory="goals"), name="videos")
 
 class HybridGoaldleCV:
     def __init__(self):
@@ -366,7 +368,7 @@ class GameResult(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def root():
     from fastapi.responses import Response
-    with open("goaldle-game.html", "r") as f:
+    with open("goaldle-game.html", "r", encoding="utf-8") as f:
         content = f.read()
     return Response(
         content=content,
@@ -380,17 +382,17 @@ async def root():
 
 @app.get("/game", response_class=HTMLResponse)
 async def serve_game():
-    with open("goaldle-game.html", "r") as f:
+    with open("goaldle-game.html", "r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/faq", response_class=HTMLResponse)
 async def serve_faq():
-    with open("faq.html", "r") as f:
+    with open("faq.html", "r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/contact", response_class=HTMLResponse)
 async def serve_contact():
-    with open("contact.html", "r") as f:
+    with open("contact.html", "r", encoding="utf-8") as f:
         return f.read()
 
 @app.get("/favicon.png")

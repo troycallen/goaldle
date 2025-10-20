@@ -91,45 +91,60 @@ class VideoManager:
         return blurred_path
     
     def get_video_pair(self, goal: Dict[str, Any]) -> Dict[str, str]:
-        """Get both original and blurred video as base64 - used for reveal"""
+        """Get both original and blurred video URLs - used for reveal"""
         result = {
             "goal_id": goal["id"],
             "player_name": goal["scorer"]
         }
-        
-        # Get original video for reveal
+
+        # Get original video URL for reveal
         original_path = goal["original_video"].replace("cv-api/", "")
-        try:
-            result["original_video"] = self.read_video_as_base64(original_path)
-        except FileNotFoundError:
-            result["original_video"] = None
+        if os.path.exists(original_path):
+            relative_path = original_path.replace("\\", "/")
+            if relative_path.startswith("goals/"):
+                relative_path = relative_path[6:]  # Remove "goals/" prefix
+            video_url = "/videos/" + relative_path
+            result["original_video_url"] = video_url
+        else:
+            result["original_video_url"] = None
             result["error"] = f"Original video not found: {original_path}"
-        
-        # Get blurred video 
+
+        # Get blurred video URL
         blurred_path = self.get_blurred_video_path(goal)
-        try:
-            result["blurred_video"] = self.read_video_as_base64(blurred_path)
-        except FileNotFoundError:
-            result["blurred_video"] = None
-        
+        if os.path.exists(blurred_path):
+            relative_path = blurred_path.replace("\\", "/")
+            if relative_path.startswith("goals/"):
+                relative_path = relative_path[6:]  # Remove "goals/" prefix
+            video_url = "/videos/" + relative_path
+            result["blurred_video_url"] = video_url
+        else:
+            result["blurred_video_url"] = None
+
         return result
     
     def get_game_video(self, goal: Dict[str, Any]) -> Dict[str, str]:
-        """Get the blurred video for gameplay - ALWAYS return blurred video"""
+        """Get the blurred video URL for gameplay - ALWAYS return blurred video"""
         result = {
             "goal_id": goal["id"],
             "player_name": goal["scorer"]
         }
-        
+
         # ALWAYS return blurred video for gameplay
         blurred_path = self.get_blurred_video_path(goal)
-        try:
-            result["original_video"] = self.read_video_as_base64(blurred_path)  # Use "original_video" key but send blurred
-            result["video_type"] = "blurred"
-        except FileNotFoundError:
-            result["original_video"] = None
+
+        # Check if file exists
+        if os.path.exists(blurred_path):
+            # Return URL path instead of base64
+            relative_path = blurred_path.replace("\\", "/")
+            if relative_path.startswith("goals/"):
+                relative_path = relative_path[6:]  
+            video_url = "/videos/" + relative_path
+            result["video_url"] = video_url
+            result["video_type"] = "url"
+        else:
+            result["video_url"] = None
             result["error"] = f"Blurred video not found: {blurred_path}"
-        
+
         return result
     
     def get_all_goals(self) -> List[Dict[str, Any]]:
