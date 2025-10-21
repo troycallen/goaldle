@@ -275,16 +275,16 @@ class GoaldleGame:
         """Compare positions with attacking/defensive hints"""
         if guess_pos == target_pos:
             return ComparisonResult("position", guess_pos, target_pos, "exact")
-        
-        attacking_positions = ["Forward", "Striker"]
-        defensive_positions = ["Defender", "Goalkeeper"]
+
+        attacking_positions = ["Striker", "Winger"]
+        defensive_positions = ["Centre Back", "Wing Back"]
         midfield_positions = ["Midfielder"]
-        
+
         guess_type = "attacking" if guess_pos in attacking_positions else \
                     "defensive" if guess_pos in defensive_positions else "midfield"
         target_type = "attacking" if target_pos in attacking_positions else \
                      "defensive" if target_pos in defensive_positions else "midfield"
-        
+
         if guess_type == target_type:
             return ComparisonResult("position", guess_pos, target_pos, "partial", f"Same type ({target_type})")
         else:

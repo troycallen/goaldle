@@ -353,31 +353,33 @@
             width: 100%;
             max-width: 450px;
             padding: 14px 18px;
-            background: #1a202c;
-            border: 2px solid #2d3748;
+            background: #1a1a1a;
+            border: 2px solid #ffeb3b;
             color: #ffffff;
             font-size: 16px;
+            font-weight: 500;
             margin: 15px auto 0 auto;
             display: block;
             border-radius: 8px;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
         .guess-input::placeholder {
-            color: #4a5568;
+            color: #9ca3af;
         }
 
         .guess-input:focus {
             outline: none;
             border-color: #ffeb3b;
+            box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.1);
         }
         
         .guesses-container {
-            margin-top: 1rem;
+            margin-top: -1rem;
         }
         
         .guess-row {
-            display: grid;
+            display: none;
             grid-template-columns: repeat(6, 1fr);
             gap: 0.5rem;
             margin-bottom: 0.75rem;
@@ -385,21 +387,26 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+        .guess-row.filled {
+            display: grid;
+        }
         
         .guess-cell {
             aspect-ratio: 2.5 / 1;
-            background: #ffffff;
+            background: #2d3748;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             font-size: 14px;
             text-align: center;
-            border: 2px solid #000000;
+            border: 1px solid #4a5568;
             min-height: 40px;
             padding: 8px;
-            color: #000000;
+            color: #ffffff;
             position: relative;
+            border-radius: 4px;
         }
         
         .guess-cell .arrow {
@@ -422,20 +429,20 @@
         
         .guess-cell.exact {
             background: #38a169;
-            border-color: #000000;
-            color: #ffffff;
+            border-color: #4a5568;
+            color: #000000 !important;
         }
-        
+
         .guess-cell.partial {
             background: #d69e2e;
-            border-color: #000000;
-            color: #ffffff;
+            border-color: #4a5568;
+            color: #000000 !important;
         }
-        
+
         .guess-cell.none {
             background: #dc2626;
-            border-color: #000000;
-            color: #ffffff;
+            border-color: #4a5568;
+            color: #ffffff !important;
         }
         
         
@@ -580,10 +587,10 @@
         }
 
         .attribute-headers {
-            display: grid;
+            display: none;
             grid-template-columns: repeat(6, 1fr);
             gap: 0.5rem;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             font-size: 15px;
             font-weight: 600;
             text-align: center;
@@ -592,11 +599,17 @@
             margin-right: auto;
         }
 
+        .attribute-headers.visible {
+            display: grid;
+        }
+
         .attribute-header {
             padding: 10px;
-            background: #ffeb3b;
-            border: 2px solid #000000;
-            color: #191919;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-weight: 600;
+            text-align: center;
         }
 
         .dropdown {
@@ -821,7 +834,7 @@
                 
                 
                 <div id="gameControls" class="hidden">
-                    <input type="text" id="playerGuess" class="guess-input" placeholder="e.g. Didier Drogba" autocomplete="off">
+                    <input type="text" id="playerGuess" class="guess-input" placeholder="Type your guess!" autocomplete="off">
                     <div id="suggestions" class="suggestions-list hidden"></div>
                 </div>
                 
@@ -1009,9 +1022,13 @@
 
         // Reset game UI
         function resetGameUI() {
-            // Clear all guess rows back to empty
+            // Hide headers
+            document.querySelector('.attribute-headers').classList.remove('visible');
+
+            // Clear all guess rows back to empty and hide them
             const rows = guesses.querySelectorAll('.guess-row');
             rows.forEach(row => {
+                row.classList.remove('filled');
                 row.querySelectorAll('.guess-cell').forEach(cell => {
                     cell.textContent = '';
                     cell.className = 'guess-cell';
@@ -1131,14 +1148,22 @@
         function displayGuess(guessResult) {
             const rows = guesses.querySelectorAll('.guess-row');
             const currentRow = rows[currentGuessRow];
-            
+
             if (currentRow) {
+                // Show the headers on first guess
+                if (currentGuessRow === 0) {
+                    document.querySelector('.attribute-headers').classList.add('visible');
+                }
+
+                // Show the row
+                currentRow.classList.add('filled');
+
                 const cells = currentRow.querySelectorAll('.guess-cell');
                 guessResult.comparisons.forEach((comp, index) => {
                     if (cells[index]) {
                         // Debug logging
                         console.log(`Column ${index}: attribute=${comp.attribute}, status=${comp.status}, hint=${comp.hint}, value=${comp.guess_value}`);
-                        
+
                         // Check if this is the age or height column
                         if ((comp.attribute === 'age' || comp.attribute === 'height') && comp.status !== 'exact') {
                             // Add arrow for age/height comparisons
