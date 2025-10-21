@@ -279,6 +279,9 @@ class HybridGoaldleCV:
         h, w = frame.shape[:2]
         combined = np.zeros((h, w, 3), dtype=np.float32)
 
+        # Single color for all players - prevents blinking from track ID changes
+        single_color = np.array([128, 128, 128], dtype=np.float32)  
+
         for x1, y1, x2, y2, tid, mask in tracks:
             m = mask
             if m.shape != (h, w):
@@ -290,16 +293,11 @@ class HybridGoaldleCV:
             # feather mask
             m = cv2.GaussianBlur(m, (21, 21), 6.0)
 
-            # pick a pseudo-random color per track ID
-            rng = np.random.default_rng(seed=tid)
-            color = rng.random(3) * np.array([255, 255, 255])
-            color = color.astype(np.float32)
-
             # expand mask to 3-channel
             m3 = np.repeat(m[:, :, None], 3, axis=2)
 
-            # add tinted region
-            combined += (m3 * color)
+            # add tinted region with same color for everyone
+            combined += (m3 * single_color)
 
         # normalize combined mask intensity
         combined = np.clip(combined, 0, 255)
