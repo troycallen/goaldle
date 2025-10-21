@@ -2,7 +2,7 @@
   {
     "name": "Didier Drogba",
     "team": "Chelsea",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Ivory Coast",
     "age": 47,
     "height": "188cm"
@@ -58,7 +58,7 @@
   {
     "name": "Erling Haaland",
     "team": "Manchester City",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Norway",
     "age": 25,
     "height": "194cm"
@@ -66,7 +66,7 @@
   {
     "name": "Harry Kane",
     "team": "Bayern Munich",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "England",
     "age": 32,
     "height": "188cm"
@@ -114,7 +114,7 @@
   {
     "name": "Victor Osimhen",
     "team": "Napoli",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Nigeria",
     "age": 26,
     "height": "185cm"
@@ -162,7 +162,7 @@
   {
     "name": "Darwin Núñez",
     "team": "Liverpool",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Uruguay",
     "age": 25,
     "height": "187cm"
@@ -210,7 +210,7 @@
   {
     "name": "Dusan Vlahovic",
     "team": "Juventus",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Serbia",
     "age": 24,
     "height": "190cm"
@@ -242,7 +242,7 @@
   {
     "name": "Robert Lewandowski",
     "team": "Barcelona",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Poland",
     "age": 36,
     "height": "185cm"
@@ -250,7 +250,7 @@
   {
     "name": "Karim Benzema",
     "team": "Al-Ittihad",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "France",
     "age": 37,
     "height": "185cm"
@@ -274,7 +274,7 @@
   {
     "name": "Ciro Immobile",
     "team": "Besiktas",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Italy",
     "age": 34,
     "height": "185cm"
@@ -330,7 +330,7 @@
   {
     "name": "Wayne Rooney",
     "team": "Plymouth Argyle",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "England",
     "age": 39,
     "height": "176cm"
@@ -346,7 +346,7 @@
   {
     "name": "Zlatan Ibrahimović",
     "team": "AC Milan",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Sweden",
     "age": 42,
     "height": "195cm"
@@ -354,7 +354,7 @@
   {
     "name": "Mario Balotelli",
     "team": "Adana Demirspor",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Italy",
     "age": 34,
     "height": "189cm"
@@ -386,7 +386,7 @@
   {
     "name": "Thierry Henry",
     "team": "Arsenal",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "France",
     "age": 47,
     "height": "188cm"
@@ -394,7 +394,7 @@
   {
     "name": "Carlos Tevez",
     "team": "Boca Juniors",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Argentina",
     "age": 40,
     "height": "173cm"
@@ -402,7 +402,7 @@
   {
     "name": "Sergio Agüero",
     "team": "Manchester City",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Argentina",
     "age": 36,
     "height": "173cm"
@@ -450,7 +450,7 @@
   {
     "name": "Fernando Torres",
     "team": "Liverpool",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Spain",
     "age": 40,
     "height": "186cm"
@@ -458,7 +458,7 @@
   {
     "name": "David Villa",
     "team": "Barcelona",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Spain",
     "age": 42,
     "height": "175cm"
@@ -506,7 +506,7 @@
   {
     "name": "Luis Suárez",
     "team": "Inter Miami",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Uruguay",
     "age": 37,
     "height": "182cm"
@@ -514,7 +514,7 @@
   {
     "name": "Edinson Cavani",
     "team": "Valencia",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Uruguay",
     "age": 37,
     "height": "184cm"
@@ -522,7 +522,7 @@
   {
     "name": "Radamel Falcao",
     "team": "Millonarios",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Colombia",
     "age": 38,
     "height": "177cm"
@@ -690,7 +690,7 @@
   {
     "name": "Mario Balotelli",
     "team": "Adana Demirspor",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Italy",
     "age": 34,
     "height": "189cm"
@@ -730,7 +730,7 @@
   {
     "name": "Ruud van Nistelrooy",
     "team": "Manchester United",
-    "position": "Striker",
+    "position": "Forward",
     "nationality": "Netherlands",
     "age": 48,
     "height": "188cm"

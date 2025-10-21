@@ -503,6 +503,8 @@ async def make_guess(request: GuessRequest):
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
         return JSONResponse(content=result)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

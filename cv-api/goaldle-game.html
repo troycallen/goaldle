@@ -351,13 +351,13 @@
 
         .guess-input {
             width: 100%;
-            max-width: 600px;
+            max-width: 450px;
             padding: 14px 18px;
             background: #1a202c;
             border: 2px solid #2d3748;
             color: #ffffff;
             font-size: 16px;
-            margin: 0 auto;
+            margin: 15px auto 0 auto;
             display: block;
             border-radius: 8px;
             transition: border-color 0.2s;
@@ -433,7 +433,7 @@
         }
         
         .guess-cell.none {
-            background: #718096;
+            background: #dc2626;
             border-color: #000000;
             color: #ffffff;
         }
@@ -1081,6 +1081,18 @@
             const player = playerGuess.value.trim();
             if (!player) return;
 
+            // Check if player has already been guessed - silently ignore
+            if (currentGame && currentGame.guesses) {
+                const alreadyGuessed = currentGame.guesses.some(guess =>
+                    guess.player.name.toLowerCase() === player.toLowerCase()
+                );
+                if (alreadyGuessed) {
+                    playerGuess.value = '';
+                    suggestions.classList.add('hidden');
+                    return;
+                }
+            }
+
             try {
                 const response = await fetch(`${API_BASE}/game/guess`, {
                     method: 'POST',
@@ -1100,6 +1112,12 @@
                     console.error('Response status:', response.status);
                     try {
                         const errorJson = JSON.parse(errorText);
+                        // Silently ignore duplicate guess errors
+                        if (errorJson.detail === 'Player already guessed') {
+                            playerGuess.value = '';
+                            suggestions.classList.add('hidden');
+                            return;
+                        }
                         showStatus(`Error: ${errorJson.detail || errorJson.error || 'Unknown server error'}`, 'error');
                     } catch {
                         showStatus(`Server error: ${response.status}`, 'error');
