@@ -430,13 +430,13 @@
         .guess-cell.exact {
             background: #38a169;
             border-color: #4a5568;
-            color: #000000 !important;
+            color: #ffffff !important;
         }
 
         .guess-cell.partial {
             background: #d69e2e;
             border-color: #4a5568;
-            color: #000000 !important;
+            color: #ffffff !important;
         }
 
         .guess-cell.none {
@@ -467,21 +467,22 @@
             border-radius: 12px;
             font-size: 1.2rem;
             font-weight: bold;
+            color: #ffffff;
         }
-        
+
         .win-message {
-            background: rgba(5, 150, 105, 0.3);
-            border: 2px solid #059669;
+            background: #38a169;
+            border: 2px solid #ffeb3b;
         }
-        
+
         .lose-message {
-            background: rgba(220, 38, 38, 0.3);
-            border: 2px solid #dc2626;
+            background: #dc2626;
+            border: 2px solid #ffeb3b;
         }
-        
+
         .game-recap {
-            background: #2d3748;
-            border: 2px solid #4a5568;
+            background: #1a202c;
+            border: 2px solid #ffeb3b;
             border-radius: 8px;
             padding: 1rem;
             margin: 0.5rem 0;
@@ -494,14 +495,14 @@
             transform: translateX(-50%);
             z-index: 5;
         }
-        
+
         .game-recap.win {
-            background: #1a4038;
-            border-color: #059669;
+            background: #1a202c;
+            border-color: #38a169;
         }
-        
+
         .game-recap.lose {
-            background: #3c1919;
+            background: #1a202c;
             border-color: #dc2626;
         }
         
@@ -530,7 +531,7 @@
         .recap-stat-value {
             font-size: 1.2rem;
             font-weight: bold;
-            color: #3182ce;
+            color: #ffeb3b;
         }
         
         .recap-stat-label {
@@ -730,7 +731,7 @@
         }
 
         .how-to-step h3 {
-            color: #81c4f7;
+            color: #ffeb3b;
             margin-bottom: 10px;
             font-size: 1.2rem;
         }
@@ -1428,17 +1429,28 @@
                     <h3>🎯 Feedback Categories</h3>
                     <p>Each guess gives clues about:</p>
                     <ul>
+                        <li><strong>Name</strong> - Player's name</li>
                         <li><strong>Team</strong> - Club at time of scoring</li>
+                        <li><strong>Position</strong> - Field position (Striker, Winger, Midfielder, Centre Back, Wing Back)</li>
                         <li><strong>Country</strong> - Player's nationality</li>
                         <li><strong>Age</strong> - How old they are</li>
                         <li><strong>Height</strong> - Player's height</li>
-                        <li><strong>Position</strong> - Field position</li>
+                    </ul>
+                </div>
+
+                <div class="how-to-step">
+                    <h3>📊 Understanding the Feedback</h3>
+                    <ul>
+                        <li><span class="correct">🟢 Green</span> - Exact match! You got this attribute right</li>
+                        <li><span class="close-guess">🟡 Yellow</span> - Close! Same league (Team), same continent (Country), or same type (Position)</li>
+                        <li><span class="wrong">🔴 Red</span> - Wrong attribute</li>
+                        <li><strong>⬆️ ⬇️ Arrows</strong> - For Age and Height, arrows show if the target is higher or lower</li>
                     </ul>
                 </div>
 
                 <div class="how-to-step">
                     <h3>⏱️ 6 Attempts</h3>
-                    <p><span class="correct">🟢 Exact match</span> | <span class="close-guess">🟡 Close</span> | <span class="wrong">🔴 Wrong</span> | ⬆️⬇️ Higher/Lower</p>
+                    <p>You have 6 guesses to identify the goal scorer. Use the color-coded feedback after each guess to narrow down your options!</p>
                 </div>
             </div>
         </div>
