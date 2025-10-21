@@ -11,7 +11,7 @@
     "name": "Lionel Messi",
     "team": "Inter Miami",
     "position": "Forward",
-    "nationality": "Argentina", 
+    "nationality": "Argentina",
     "age": 38,
     "height": "170cm"
   },
@@ -686,5 +686,61 @@
     "nationality": "Belgium",
     "age": 32,
     "height": "199cm"
+  },
+  {
+    "name": "Mario Balotelli",
+    "team": "Adana Demirspor",
+    "position": "Striker",
+    "nationality": "Italy",
+    "age": 34,
+    "height": "189cm"
+  },
+  {
+    "name": "Erik Edman",
+    "team": "Tottenham",
+    "position": "Defender",
+    "nationality": "Sweden",
+    "age": 47,
+    "height": "178cm"
+  },
+  {
+    "name": "Maicon",
+    "team": "Inter Milan",
+    "position": "Defender",
+    "nationality": "Brazil",
+    "age": 43,
+    "height": "184cm"
+  },
+  {
+    "name": "Nelson Palacio",
+    "team": "Real Salt Lake",
+    "position": "Midfielder",
+    "nationality": "Colombia",
+    "age": 30,
+    "height": "173cm"
+  },
+  {
+    "name": "Dimitri Payet",
+    "team": "West Ham",
+    "position": "Midfielder",
+    "nationality": "France",
+    "age": 37,
+    "height": "175cm"
+  },
+  {
+    "name": "Ruud van Nistelrooy",
+    "team": "Manchester United",
+    "position": "Striker",
+    "nationality": "Netherlands",
+    "age": 48,
+    "height": "188cm"
+  },
+  {
+    "name": "James Ward-Prowse",
+    "team": "West Ham",
+    "position": "Midfielder",
+    "nationality": "England",
+    "age": 30,
+    "height": "173cm"
   }
 ]

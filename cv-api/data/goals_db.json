@@ -28,5 +28,53 @@
     "original_video": "cv-api/goals/tatsuya_ito.mp4",
     "blurred_video": "cv-api/goals/blurred/tatsuya_ito_blurred.mp4",
     "scorer": "Tatsuya Ito"
+  },
+  {
+    "id": "6",
+    "original_video": "cv-api/goals/balotelli.mp4",
+    "blurred_video": "cv-api/goals/blurred/balotelli_blurred.mp4",
+    "scorer": "Mario Balotelli"
+  },
+  {
+    "id": "7",
+    "original_video": "cv-api/goals/edman.mp4",
+    "blurred_video": "cv-api/goals/blurred/edman_blurred.mp4",
+    "scorer": "Erik Edman"
+  },
+  {
+    "id": "8",
+    "original_video": "cv-api/goals/maicon.mp4",
+    "blurred_video": "cv-api/goals/blurred/maicon_blurred.mp4",
+    "scorer": "Maicon"
+  },
+  {
+    "id": "9",
+    "original_video": "cv-api/goals/messi_2.mp4",
+    "blurred_video": "cv-api/goals/blurred/messi_2_blurred.mp4",
+    "scorer": "Lionel Messi"
+  },
+  {
+    "id": "10",
+    "original_video": "cv-api/goals/palacio.mp4",
+    "blurred_video": "cv-api/goals/blurred/palacio_blurred.mp4",
+    "scorer": "Nelson Palacio"
+  },
+  {
+    "id": "11",
+    "original_video": "cv-api/goals/payet.mp4",
+    "blurred_video": "cv-api/goals/blurred/payet_blurred.mp4",
+    "scorer": "Dimitri Payet"
+  },
+  {
+    "id": "12",
+    "original_video": "cv-api/goals/van-Nistelrooy.mp4",
+    "blurred_video": "cv-api/goals/blurred/van-Nistelrooy_blurred.mp4",
+    "scorer": "Ruud van Nistelrooy"
+  },
+  {
+    "id": "13",
+    "original_video": "cv-api/goals/ward-prowse.mp4",
+    "blurred_video": "cv-api/goals/blurred/ward-prowse_blurred.mp4",
+    "scorer": "James Ward-Prowse"
   }
 ]
