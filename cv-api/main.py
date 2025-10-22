@@ -437,7 +437,7 @@ async def serve_favicon():
         "favicon.png",
         media_type="image/png",
         headers={
-            "Cache-Control": "public, max-age=3600"
+            "Cache-Control": "public, max-age=86400"
         }
     )
 
@@ -445,7 +445,13 @@ async def serve_favicon():
 @app.get("/favicon.ico")
 async def serve_favicon_ico():
     from fastapi.responses import FileResponse
-    return FileResponse("favicon.png", media_type="image/png")
+    return FileResponse(
+        "favicon.ico",
+        media_type="image/x-icon",
+        headers={
+            "Cache-Control": "public, max-age=604800"
+        }
+    )
 
 
 @app.get("/sitemap.xml")
@@ -676,3 +682,4 @@ if __name__ == "__main__":
     print("🚀 Starting GoalDle CV API - Now with Personal Stats!")
     port = int(os.environ.get("PORT", 8001))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
