@@ -430,7 +430,7 @@ async def serve_contact():
         return f.read()
 
 
-@app.get("/favicon.png")
+@app.api_route("/favicon.png", methods=["GET", "HEAD"])
 async def serve_favicon():
     from fastapi.responses import FileResponse
     return FileResponse(
@@ -442,7 +442,7 @@ async def serve_favicon():
     )
 
 
-@app.get("/favicon.ico")
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"])
 async def serve_favicon_ico():
     from fastapi.responses import FileResponse
     return FileResponse(
@@ -682,4 +682,5 @@ if __name__ == "__main__":
     print("🚀 Starting GoalDle CV API - Now with Personal Stats!")
     port = int(os.environ.get("PORT", 8001))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
 
