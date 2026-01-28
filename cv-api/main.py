@@ -1,9 +1,7 @@
-# Goaldle CV API - Hybrid Approach (Best of Both) [Upgraded]
+# Goaldle CV API 
 import subprocess
 import sys
 import os
-
-# Dependencies are installed via requirements.txt
 
 # import everything
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -35,7 +33,6 @@ app.mount("/videos", StaticFiles(directory="goals"), name="videos")
 
 class HybridGoaldleCV:
     def __init__(self):
-        # Slightly larger/better model; still fast
         self.yolo = YOLO('yolov8s-seg.pt')
         self.device = 0 if torch.cuda.is_available() else "cpu"
         self.use_half = torch.cuda.is_available()
@@ -44,7 +41,6 @@ class HybridGoaldleCV:
         self.next_id = 0
         self.max_disappeared = 45  # Increased from 30 - keep tracks alive longer
         self.min_confidence = 0.25  # Lowered from 0.30 - detect players more reliably
-        # dynamic thresholds will be set per-frame based on resolution
         self.max_distance = 150
         self.min_iou = 0.05  # Lowered from 0.10 - allow more flexible matching
 
